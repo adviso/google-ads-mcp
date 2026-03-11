@@ -87,7 +87,7 @@ def _search_tool_description() -> str:
 
 ### Hints
     Language Grammar can be found at https://developers.google.com/google-ads/api/docs/query/grammar
-    All resources and descriptions are found at https://developers.google.com/google-ads/api/fields/v21/overview
+    All resources and descriptions are found at https://developers.google.com/google-ads/api/fields/v23/overview
 
     For Conversion issues try looking in offline_conversion_upload_conversion_action_summary
 

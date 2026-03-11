@@ -20,7 +20,7 @@ from typing import Any
 import proto
 import logging
 from google.ads.googleads.client import GoogleAdsClient
-from google.ads.googleads.v21.services.services.google_ads_service import (
+from google.ads.googleads.v23.services.services.google_ads_service import (
     GoogleAdsServiceClient,
 )
 
@@ -42,7 +42,7 @@ _READ_ONLY_ADS_SCOPE = "https://www.googleapis.com/auth/adwords"
 
 def _create_credentials() -> google.auth.credentials.Credentials:
     """Returns Application Default Credentials with read-only scope."""
-    (credentials, _) = google.auth.default(scopes=[_READ_ONLY_ADS_SCOPE])
+    credentials, _ = google.auth.default(scopes=[_READ_ONLY_ADS_SCOPE])
     return credentials
 
 
@@ -56,7 +56,7 @@ def _get_developer_token() -> str:
     return dev_token
 
 
-def _get_login_customer_id() -> str:
+def _get_login_customer_id() -> str | None:
     """Returns login customer id, if set, from the environment variable GOOGLE_ADS_LOGIN_CUSTOMER_ID."""
     return os.environ.get("GOOGLE_ADS_LOGIN_CUSTOMER_ID")
 
@@ -64,11 +64,18 @@ def _get_login_customer_id() -> str:
 def _get_googleads_client() -> GoogleAdsClient:
     # Use this line if you have a google-ads.yaml file
     # client = GoogleAdsClient.load_from_storage()
-    client = GoogleAdsClient(
-        credentials=_create_credentials(),
-        developer_token=_get_developer_token(),
-        login_customer_id=_get_login_customer_id(),
-    )
+    args = {
+        "credentials": _create_credentials(),
+        "developer_token": _get_developer_token(),
+    }
+
+    # If the login-customer-id is not set, avoid setting None.
+    login_customer_id = _get_login_customer_id()
+
+    if login_customer_id:
+        args["login_customer_id"] = login_customer_id
+
+    client = GoogleAdsClient(**args)
 
     return client
 
@@ -84,6 +91,10 @@ def get_googleads_service(serviceName: str) -> GoogleAdsServiceClient:
 
 def get_googleads_type(typeName: str):
     return _googleads_client.get_type(typeName)
+
+
+def get_googleads_client():
+    return _googleads_client
 
 
 def format_output_value(value: Any) -> Any:

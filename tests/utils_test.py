@@ -15,7 +15,7 @@
 """Test cases for the utils module."""
 
 import unittest
-from google.ads.googleads.v21.enums.types.campaign_status import (
+from google.ads.googleads.v23.enums.types.campaign_status import (
     CampaignStatusEnum,
 )
 
