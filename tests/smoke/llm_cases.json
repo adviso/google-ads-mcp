@@ -1,0 +1,30 @@
+[
+  {
+    "prompt": "List the customers I can access.",
+    "expected_tool": "list_accessible_customers"
+  },
+  {
+    "prompt": "Find campaigns matching 'Test Campaign' for customer 1234567890.",
+    "expected_tool": "search"
+  },
+  {
+    "prompt": "Show me all my accounts.",
+    "expected_tool": "list_accessible_customers"
+  },
+  {
+    "prompt": "Which customers do I have access to?",
+    "expected_tool": "list_accessible_customers"
+  },
+  {
+    "prompt": "Find enabled ad groups for customer 5555555555.",
+    "expected_tool": "search"
+  },
+  {
+    "prompt": "Get keywords for campaign 'Summer Sale' in account 9876543210.",
+    "expected_tool": "search"
+  },
+  {
+    "prompt": "Show me the metrics for customer 1112223333.",
+    "expected_tool": "search"
+  }
+]
