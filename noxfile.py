@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import nox
+import sys
 
 PYTHON_VERSIONS = ["3.10", "3.11", "3.12", "3.13"]
 
@@ -29,7 +30,7 @@ TEST_COMMAND = [
     "*_test.py",
 ]
 
-FREEZE_COMMAND = ["python", "-m", "pip", "freeze"]
+FREEZE_COMMAND = [sys.executable, "-m", "pip", "freeze"]
 TEST_DEPENDENCIES = [
     "pyfakefs>=5.0.0,<6.0",
     "coverage==6.5.0",
@@ -83,3 +84,22 @@ def tests(session):
     session.run(
         *TEST_COMMAND,
     )
+
+
+@nox.session(venv_backend="none")
+def smoke_tests(session):
+    """Runs the smoke tests."""
+    session.run(sys.executable, "-m", "unittest", "tests/smoke/smoke_test.py")
+
+
+@nox.session(venv_backend="none")
+def llm_tests(session):
+    """Runs the LLM tool selection smoke tests."""
+    session.run(sys.executable, "-m", "pip", "install", "google-genai")
+    session.run(sys.executable, "-m", "unittest", "tests/smoke/llm_test.py")
+
+
+@nox.session(venv_backend="none")
+def update_smoke_golden(session):
+    """Updates the smoke test golden file."""
+    session.run(sys.executable, "-m", "tests.smoke.generate_golden")
