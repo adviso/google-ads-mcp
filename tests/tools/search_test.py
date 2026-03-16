@@ -30,14 +30,17 @@ class TestSearch(unittest.TestCase):
         # Setup mock service and search stream
         mock_service = MagicMock()
         mock_get_service.return_value = mock_service
-        
+
         # Mock result results
         mock_batch = MagicMock()
         mock_batch.results = [MagicMock(), MagicMock()]
         mock_batch.field_mask.paths = ["campaign.id", "campaign.name"]
         mock_service.search_stream.return_value = [mock_batch]
-        
-        mock_format_row.side_effect = [{"id": 1, "name": "C1"}, {"id": 2, "name": "C2"}]
+
+        mock_format_row.side_effect = [
+            {"id": 1, "name": "C1"},
+            {"id": 2, "name": "C2"},
+        ]
 
         # Call search
         results = search.search(
@@ -46,7 +49,7 @@ class TestSearch(unittest.TestCase):
             resource="campaign",
             conditions=["campaign.status = 'ENABLED'"],
             orderings=["campaign.name ASC"],
-            limit=10
+            limit=10,
         )
 
         # Verify query
@@ -71,7 +74,10 @@ class TestSearch(unittest.TestCase):
         # Mocking open as if the file exists
         m = mock_open(read_data="resource1: field1, field2")
         with patch("builtins.open", m):
-            with patch("ads_mcp.utils.get_gaql_resources_filepath", return_value="/fake/path"):
+            with patch(
+                "ads_mcp.utils.get_gaql_resources_filepath",
+                return_value="/fake/path",
+            ):
                 description = search._search_tool_description()
                 self.assertIn("resource1: field1, field2", description)
                 self.assertIn("Language Grammar", description)
@@ -79,8 +85,14 @@ class TestSearch(unittest.TestCase):
     def test_search_tool_description_file_not_found(self):
         """Tests that the tool description handles missing file correctly."""
         with patch("builtins.open", side_effect=FileNotFoundError):
-            with patch("ads_mcp.utils.get_gaql_resources_filepath", return_value="/fake/path"):
+            with patch(
+                "ads_mcp.utils.get_gaql_resources_filepath",
+                return_value="/fake/path",
+            ):
                 with patch("ads_mcp.utils.logger.error") as mock_log_error:
                     description = search._search_tool_description()
-                    self.assertIn("WARNING: The table of selectable fields is missing.", description)
+                    self.assertIn(
+                        "WARNING: The table of selectable fields is missing.",
+                        description,
+                    )
                     mock_log_error.assert_called_once()
