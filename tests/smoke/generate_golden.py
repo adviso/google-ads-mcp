@@ -2,6 +2,7 @@ import json
 import os
 import sys
 from tests.smoke import smoke_utils
+
 try:
     from tests.smoke import llm_sender
 except ImportError:
@@ -30,11 +31,17 @@ def main():
 
         # Update LLM cases with token usage baselines
         if not os.environ.get("GEMINI_API_KEY"):
-            print("GEMINI_API_KEY not set, skipping LLM baselines.", file=sys.stderr)
+            print(
+                "GEMINI_API_KEY not set, skipping LLM baselines.",
+                file=sys.stderr,
+            )
             return
 
         if llm_sender is None:
-            print("llm_sender not available, skipping LLM baselines.", file=sys.stderr)
+            print(
+                "llm_sender not available, skipping LLM baselines.",
+                file=sys.stderr,
+            )
             return
 
         cases_path = os.path.join(os.path.dirname(__file__), "llm_cases.json")
@@ -51,17 +58,28 @@ def main():
             prompt = case["prompt"]
             print(f"  Processing prompt: '{prompt}'", file=sys.stderr)
             try:
-                result = llm_sender.get_llm_response(prompt, tools, include_usage=True)
+                result = llm_sender.get_llm_response(
+                    prompt, tools, include_usage=True
+                )
                 if result and "usage" in result:
-                    case["prompt_tokens"] = result["usage"]["prompt_token_count"]
-                    case["output_tokens"] = result["usage"]["candidates_token_count"]
-                    case["thought_tokens"] = result["usage"]["thought_token_count"]
+                    case["prompt_tokens"] = result["usage"][
+                        "prompt_token_count"
+                    ]
+                    case["output_tokens"] = result["usage"][
+                        "candidates_token_count"
+                    ]
+                    case["thought_tokens"] = result["usage"][
+                        "thought_token_count"
+                    ]
                     case["model"] = result["model"]
                     # Clean up old keys if present
                     case.pop("cached_tokens", None)
                     case.pop("thoughts_tokens", None)
             except Exception as e:
-                print(f"  Error processing prompt '{prompt}': {e}", file=sys.stderr)
+                print(
+                    f"  Error processing prompt '{prompt}': {e}",
+                    file=sys.stderr,
+                )
 
         with open(cases_path, "w") as f:
             json.dump(cases, f, indent=2)

@@ -19,7 +19,9 @@ def compare_usage(current, baseline, label, threshold=0.05):
     if baseline == 0:
         if current == 0:
             return True
-        print(f"  [WARNING] {label} usage increased: baseline was 0, now {current}")
+        print(
+            f"  [WARNING] {label} usage increased: baseline was 0, now {current}"
+        )
         return False
 
     if current <= baseline:
@@ -62,7 +64,10 @@ def main():
     failures = 0
     total_cases = len(cases)
 
-    print(f"Starting token usage comparison for {total_cases} cases...", file=sys.stderr)
+    print(
+        f"Starting token usage comparison for {total_cases} cases...",
+        file=sys.stderr,
+    )
 
     for i, case in enumerate(cases, 1):
         prompt = case["prompt"]
@@ -72,13 +77,17 @@ def main():
         baseline_model = case.get("model", "unknown")
 
         if baseline_prompt is None or baseline_output is None:
-            print(f"[{i}/{total_cases}] Skipping '{prompt}': no baseline found.")
+            print(
+                f"[{i}/{total_cases}] Skipping '{prompt}': no baseline found."
+            )
             continue
 
         print(f"[{i}/{total_cases}] Testing prompt: '{prompt}'")
         try:
             # Note: llm_sender.get_llm_response already has a sleep(5) internally.
-            result = llm_sender.get_llm_response(prompt, tools, include_usage=True)
+            result = llm_sender.get_llm_response(
+                prompt, tools, include_usage=True
+            )
             if result and "usage" in result:
                 current_prompt = result["usage"]["prompt_token_count"]
                 current_output = result["usage"]["candidates_token_count"]
@@ -86,16 +95,22 @@ def main():
                 current_model = result["model"]
 
                 if current_model != baseline_model:
-                    print(f"  [INFO] Model changed: {baseline_model} -> {current_model}")
+                    print(
+                        f"  [INFO] Model changed: {baseline_model} -> {current_model}"
+                    )
 
                 p_ok = compare_usage(current_prompt, baseline_prompt, "Prompt")
                 o_ok = compare_usage(current_output, baseline_output, "Output")
-                t_ok = compare_usage(current_thought, baseline_thought, "Thought", threshold=0.15)
+                t_ok = compare_usage(
+                    current_thought, baseline_thought, "Thought", threshold=0.15
+                )
 
                 if not (p_ok and o_ok and t_ok):
                     failures += 1
                 else:
-                    print(f"  [OK] Prompt: {current_prompt}, Output: {current_output}, Thought: {current_thought}")
+                    print(
+                        f"  [OK] Prompt: {current_prompt}, Output: {current_output}, Thought: {current_thought}"
+                    )
 
             # Sleep to avoid rate limits (in addition to internal sleep)
             time.sleep(5)
@@ -104,7 +119,9 @@ def main():
             failures += 1
 
     if failures > 0:
-        print(f"\n[FAIL] Found {failures} cases with significant token usage increases.")
+        print(
+            f"\n[FAIL] Found {failures} cases with significant token usage increases."
+        )
         sys.exit(1)
     else:
         print("\n[SUCCESS] All cases within token usage thresholds.")

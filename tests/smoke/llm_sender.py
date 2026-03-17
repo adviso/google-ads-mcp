@@ -8,7 +8,9 @@ from google.genai import errors
 from tests.smoke import smoke_utils
 
 
-def get_llm_response(prompt: str, tools: list, include_usage: bool = False) -> str | dict:
+def get_llm_response(
+    prompt: str, tools: list, include_usage: bool = False
+) -> str | dict:
     """Sends a prompt to the LLM with the given tools and returns the tool usage."""
     api_key = os.environ.get("GEMINI_API_KEY")
     if not api_key:
@@ -69,7 +71,16 @@ def get_llm_response(prompt: str, tools: list, include_usage: bool = False) -> s
                             "prompt_token_count": response.usage_metadata.prompt_token_count,
                             "candidates_token_count": response.usage_metadata.candidates_token_count,
                             "total_token_count": response.usage_metadata.total_token_count,
-                            "thought_token_count": getattr(response.usage_metadata, "thought_token_count", 0) or getattr(response.usage_metadata, "thoughts_token_count", 0),
+                            "thought_token_count": getattr(
+                                response.usage_metadata,
+                                "thought_token_count",
+                                0,
+                            )
+                            or getattr(
+                                response.usage_metadata,
+                                "thoughts_token_count",
+                                0,
+                            ),
                         },
                         "model": "gemini-flash-latest",
                     }
@@ -89,7 +100,12 @@ def get_llm_response(prompt: str, tools: list, include_usage: bool = False) -> s
                     "prompt_token_count": response.usage_metadata.prompt_token_count,
                     "candidates_token_count": response.usage_metadata.candidates_token_count,
                     "total_token_count": response.usage_metadata.total_token_count,
-                    "thought_token_count": getattr(response.usage_metadata, "thought_token_count", 0) or getattr(response.usage_metadata, "thoughts_token_count", 0),
+                    "thought_token_count": getattr(
+                        response.usage_metadata, "thought_token_count", 0
+                    )
+                    or getattr(
+                        response.usage_metadata, "thoughts_token_count", 0
+                    ),
                 }
                 return {
                     "tool_name": selected_tool,
