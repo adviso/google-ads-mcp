@@ -1,30 +1,66 @@
 [
   {
     "prompt": "List the customers I can access.",
-    "expected_tool": "list_accessible_customers"
+    "expected_tool": "list_accessible_customers",
+    "prompt_tokens": 259,
+    "output_tokens": 12,
+    "model": "gemini-flash-latest",
+    "thought_tokens": 55
   },
   {
-    "prompt": "Find campaigns matching 'Test Campaign' for customer 1234567890.",
-    "expected_tool": "search"
+    "prompt": "Find campaigns matching 'Test Campaign' for customer {customer_id}.",
+    "expected_tool": "search",
+    "prompt_tokens": 273,
+    "output_tokens": 64,
+    "model": "gemini-flash-latest",
+    "thought_tokens": 398
   },
   {
     "prompt": "Show me all my accounts.",
-    "expected_tool": "list_accessible_customers"
+    "expected_tool": "list_accessible_customers",
+    "prompt_tokens": 258,
+    "output_tokens": 12,
+    "model": "gemini-flash-latest",
+    "thought_tokens": 36
   },
   {
     "prompt": "Which customers do I have access to?",
-    "expected_tool": "list_accessible_customers"
+    "expected_tool": "list_accessible_customers",
+    "prompt_tokens": 260,
+    "output_tokens": 12,
+    "model": "gemini-flash-latest",
+    "thought_tokens": 39
   },
   {
-    "prompt": "Find enabled ad groups for customer 5555555555.",
-    "expected_tool": "search"
+    "prompt": "Find enabled ad groups for customer {customer_id}.",
+    "expected_tool": "search",
+    "prompt_tokens": 270,
+    "output_tokens": 59,
+    "model": "gemini-flash-latest",
+    "thought_tokens": 174
   },
   {
-    "prompt": "Get keywords for campaign 'Summer Sale' in account 9876543210.",
-    "expected_tool": "search"
+    "prompt": "Get keywords for campaign 'Summer Sale' in account {customer_id}.",
+    "expected_tool": "search",
+    "prompt_tokens": 274,
+    "output_tokens": 58,
+    "model": "gemini-flash-latest",
+    "thought_tokens": 216
   },
   {
-    "prompt": "Show me the metrics for customer 1112223333.",
-    "expected_tool": "search"
+    "prompt": "Show me the metrics for customer {customer_id}.",
+    "expected_tool": "search",
+    "prompt_tokens": 270,
+    "output_tokens": 86,
+    "model": "gemini-flash-latest",
+    "thought_tokens": 168
+  },
+  {
+    "prompt": "Generate a daily report of clicks for all active campaigns in account {customer_id}.",
+    "expected_tool": "search",
+    "prompt_tokens": 276,
+    "output_tokens": 51,
+    "thought_tokens": 426,
+    "model": "gemini-flash-latest"
   }
 ]

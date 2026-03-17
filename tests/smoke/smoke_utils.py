@@ -2,6 +2,7 @@ import json
 import subprocess
 import sys
 import threading
+import os
 from typing import Any, Dict, List, Optional
 
 
@@ -90,3 +91,9 @@ def get_tools_list() -> Dict[str, Any]:
             process.stdout.close()
         process.terminate()
         process.wait()
+
+
+def inject_customer_id(prompt: str) -> str:
+    """Replaces {customer_id} placeholder with GOOGLE_ADS_CUSTOMER_ID env var."""
+    customer_id = os.environ.get("GOOGLE_ADS_CUSTOMER_ID", "1234567890")
+    return prompt.replace("{customer_id}", customer_id)

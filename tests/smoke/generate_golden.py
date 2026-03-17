@@ -2,6 +2,10 @@ import json
 import os
 import sys
 from tests.smoke import smoke_utils
+try:
+    from tests.smoke import llm_sender
+except ImportError:
+    llm_sender = None
 
 
 def main():
@@ -22,7 +26,48 @@ def main():
             json.dump(tools_list, f, indent=2, sort_keys=True)
             f.write("\n")  # Add trailing newline
 
-        print("Done.", file=sys.stderr)
+        print("Done updating golden tools list.", file=sys.stderr)
+
+        # Update LLM cases with token usage baselines
+        if not os.environ.get("GEMINI_API_KEY"):
+            print("GEMINI_API_KEY not set, skipping LLM baselines.", file=sys.stderr)
+            return
+
+        if llm_sender is None:
+            print("llm_sender not available, skipping LLM baselines.", file=sys.stderr)
+            return
+
+        cases_path = os.path.join(os.path.dirname(__file__), "llm_cases.json")
+        if not os.path.exists(cases_path):
+            print(f"LLM cases file not found at {cases_path}", file=sys.stderr)
+            return
+
+        print(f"Updating LLM baselines in {cases_path}...", file=sys.stderr)
+        with open(cases_path, "r") as f:
+            cases = json.load(f)
+
+        tools = tools_list.get("tools", [])
+        for case in cases:
+            prompt = case["prompt"]
+            print(f"  Processing prompt: '{prompt}'", file=sys.stderr)
+            try:
+                result = llm_sender.get_llm_response(prompt, tools, include_usage=True)
+                if result and "usage" in result:
+                    case["prompt_tokens"] = result["usage"]["prompt_token_count"]
+                    case["output_tokens"] = result["usage"]["candidates_token_count"]
+                    case["thought_tokens"] = result["usage"]["thought_token_count"]
+                    case["model"] = result["model"]
+                    # Clean up old keys if present
+                    case.pop("cached_tokens", None)
+                    case.pop("thoughts_tokens", None)
+            except Exception as e:
+                print(f"  Error processing prompt '{prompt}': {e}", file=sys.stderr)
+
+        with open(cases_path, "w") as f:
+            json.dump(cases, f, indent=2)
+            f.write("\n")
+
+        print("LLM baselines updated.", file=sys.stderr)
     except Exception as e:
         print(f"Error: {e}", file=sys.stderr)
         sys.exit(1)
