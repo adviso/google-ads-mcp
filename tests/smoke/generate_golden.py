@@ -2,6 +2,7 @@ import json
 import os
 import sys
 from tests.smoke import smoke_utils
+from google.genai import types
 
 try:
     from tests.smoke import llm_sender
@@ -75,6 +76,38 @@ def main():
                     # Clean up old keys if present
                     case.pop("cached_tokens", None)
                     case.pop("thoughts_tokens", None)
+
+                    tool_name = result.get("tool_name")
+                    tool_args = result.get("tool_args")
+                    if tool_name:
+                        print(
+                            f"    Executing tool '{tool_name}' for baseline...",
+                            file=sys.stderr,
+                        )
+                        try:
+                            tool_result = smoke_utils.call_tool(
+                                tool_name, tool_args
+                            )
+                            resp_part = types.Part.from_function_response(
+                                name=tool_name, response=tool_result
+                            )
+                            tool_content = types.Content(
+                                role="tool", parts=[resp_part]
+                            )
+                            tool_tokens = llm_sender.count_tokens(tool_content)
+                            case["tool_tokens"] = tool_tokens
+                            print(
+                                f"    Tool tokens recorded: {tool_tokens}",
+                                file=sys.stderr,
+                            )
+                        except Exception as e:
+                            print(
+                                f"    Error recording tool tokens: {e}",
+                                file=sys.stderr,
+                            )
+                            case["tool_tokens"] = 0
+                    else:
+                        case.pop("tool_tokens", None)
             except Exception as e:
                 print(
                     f"  Error processing prompt '{prompt}': {e}",

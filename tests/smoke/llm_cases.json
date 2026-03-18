@@ -5,7 +5,8 @@
     "prompt_tokens": 259,
     "output_tokens": 12,
     "model": "gemini-flash-latest",
-    "thought_tokens": 55
+    "thought_tokens": 38,
+    "tool_tokens": 195
   },
   {
     "prompt": "Find campaigns matching 'Test Campaign' for customer {customer_id}.",
@@ -13,7 +14,8 @@
     "prompt_tokens": 273,
     "output_tokens": 64,
     "model": "gemini-flash-latest",
-    "thought_tokens": 398
+    "thought_tokens": 288,
+    "tool_tokens": 22
   },
   {
     "prompt": "Show me all my accounts.",
@@ -21,7 +23,8 @@
     "prompt_tokens": 258,
     "output_tokens": 12,
     "model": "gemini-flash-latest",
-    "thought_tokens": 36
+    "thought_tokens": 36,
+    "tool_tokens": 195
   },
   {
     "prompt": "Which customers do I have access to?",
@@ -29,15 +32,17 @@
     "prompt_tokens": 260,
     "output_tokens": 12,
     "model": "gemini-flash-latest",
-    "thought_tokens": 39
+    "thought_tokens": 39,
+    "tool_tokens": 195
   },
   {
     "prompt": "Find enabled ad groups for customer {customer_id}.",
     "expected_tool": "search",
     "prompt_tokens": 270,
-    "output_tokens": 59,
+    "output_tokens": 73,
     "model": "gemini-flash-latest",
-    "thought_tokens": 174
+    "thought_tokens": 238,
+    "tool_tokens": 6052
   },
   {
     "prompt": "Get keywords for campaign 'Summer Sale' in account {customer_id}.",
@@ -45,7 +50,8 @@
     "prompt_tokens": 274,
     "output_tokens": 58,
     "model": "gemini-flash-latest",
-    "thought_tokens": 216
+    "thought_tokens": 227,
+    "tool_tokens": 22
   },
   {
     "prompt": "Show me the metrics for customer {customer_id}.",
@@ -53,14 +59,16 @@
     "prompt_tokens": 270,
     "output_tokens": 86,
     "model": "gemini-flash-latest",
-    "thought_tokens": 168
+    "thought_tokens": 302,
+    "tool_tokens": 294
   },
   {
     "prompt": "Generate a daily report of clicks for all active campaigns in account {customer_id}.",
     "expected_tool": "search",
     "prompt_tokens": 276,
-    "output_tokens": 51,
-    "thought_tokens": 426,
-    "model": "gemini-flash-latest"
+    "output_tokens": 57,
+    "thought_tokens": 303,
+    "model": "gemini-flash-latest",
+    "tool_tokens": 313
   }
 ]

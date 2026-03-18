@@ -3,6 +3,7 @@ import os
 import sys
 import time
 from tests.smoke import smoke_utils
+from google.genai import types
 
 try:
     from tests.smoke import llm_sender
@@ -74,6 +75,7 @@ def main():
         baseline_prompt = case.get("prompt_tokens")
         baseline_output = case.get("output_tokens")
         baseline_thought = case.get("thought_tokens", 0)
+        baseline_tool_tokens = case.get("tool_tokens")
         baseline_model = case.get("model", "unknown")
 
         if baseline_prompt is None or baseline_output is None:
@@ -105,11 +107,56 @@ def main():
                     current_thought, baseline_thought, "Thought", threshold=0.15
                 )
 
-                if not (p_ok and o_ok and t_ok):
+                tool_name = result.get("tool_name")
+                tool_args = result.get("tool_args")
+                tool_ok = True
+                current_tool_tokens = 0
+
+                if tool_name:
+                    print(f"  [INFO] Tool call: {tool_name}")
+                    try:
+                        # Execute tool call
+                        tool_result = smoke_utils.call_tool(
+                            tool_name, tool_args
+                        )
+
+                        # Measure token count of response
+                        resp_part = types.Part.from_function_response(
+                            name=tool_name, response=tool_result
+                        )
+                        tool_content = types.Content(
+                            role="tool", parts=[resp_part]
+                        )
+                        current_tool_tokens = llm_sender.count_tokens(
+                            tool_content
+                        )
+                        print(
+                            f"  [INFO] Tool Response Tokens: {current_tool_tokens}"
+                        )
+
+                        if baseline_tool_tokens is not None:
+                            tool_ok = compare_usage(
+                                current_tool_tokens,
+                                baseline_tool_tokens,
+                                "Tool Response",
+                            )
+                        else:
+                            print(
+                                f"  [INFO] No tool token baseline found for comparison."
+                            )
+
+                    except Exception as e:
+                        print(f"  [ERROR] Tool execution failed: {e}")
+                        tool_ok = False
+
+                if not (p_ok and o_ok and t_ok and tool_ok):
                     failures += 1
                 else:
+                    tool_msg = (
+                        f", Tool: {current_tool_tokens}" if tool_name else ""
+                    )
                     print(
-                        f"  [OK] Prompt: {current_prompt}, Output: {current_output}, Thought: {current_thought}"
+                        f"  [OK] Prompt: {current_prompt}, Output: {current_output}, Thought: {current_thought}{tool_msg}"
                     )
 
             # Sleep to avoid rate limits (in addition to internal sleep)

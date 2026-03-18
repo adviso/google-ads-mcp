@@ -22,14 +22,16 @@ def send_request(
     process: subprocess.Popen,
     method: str,
     params: Optional[Dict[str, Any]] = None,
-    req_id: int = 1,
+    req_id: Optional[int] = 1,
 ) -> None:
-    """Sends a JSON-RPC request to the server."""
+    """Sends a JSON-RPC request or notification to the server."""
     request = {
         "jsonrpc": "2.0",
-        "id": req_id,
         "method": method,
     }
+    if req_id is not None:
+        request["id"] = req_id
+
     if params:
         request["params"] = params
 
@@ -97,3 +99,49 @@ def inject_customer_id(prompt: str) -> str:
     """Replaces {customer_id} placeholder with GOOGLE_ADS_CUSTOMER_ID env var."""
     customer_id = os.environ.get("GOOGLE_ADS_CUSTOMER_ID", "1234567890")
     return prompt.replace("{customer_id}", customer_id)
+
+
+def call_tool(name: str, arguments: dict) -> Dict[str, Any]:
+    """Runs the server and calls a specific tool."""
+    process = start_server_process()
+    try:
+        # Initialize
+        send_request(
+            process,
+            "initialize",
+            {
+                "protocolVersion": "2024-11-05",
+                "capabilities": {},
+                "clientInfo": {"name": "smoke-test", "version": "1.0"},
+            },
+            req_id=1,
+        )
+
+        # Read initialize response
+        response = read_response(process)
+        if "error" in response:
+            raise RuntimeError(f"Initialize failed: {response['error']}")
+
+        # Send initialized notification
+        send_request(process, "notifications/initialized", req_id=None)
+
+        # Call tool
+        send_request(
+            process,
+            "tools/call",
+            {"name": name, "arguments": arguments},
+            req_id=2,
+        )
+        response = read_response(process)
+
+        if "error" in response:
+            raise RuntimeError(f"tools/call failed: {response['error']}")
+
+        return response["result"]
+    finally:
+        if process.stdin:
+            process.stdin.close()
+        if process.stdout:
+            process.stdout.close()
+        process.terminate()
+        process.wait()
