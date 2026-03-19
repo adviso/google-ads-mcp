@@ -65,6 +65,7 @@ def _get_googleads_client() -> GoogleAdsClient:
     args = {
         "credentials": _create_credentials(),
         "developer_token": _get_developer_token(),
+        "use_proto_plus": True,
     }
 
     # If the login-customer-id is not set, avoid setting None.
