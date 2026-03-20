@@ -12,7 +12,7 @@ except ImportError:
 
 def main():
     try:
-        print("Fetching tools list from server...", file=sys.stderr)
+        print("Fetching tools list from server...")
         tools_list = smoke_utils.get_tools_list()
 
         # Sort tools by name to ensure deterministic output
@@ -23,12 +23,12 @@ def main():
             os.path.dirname(__file__), "golden_tools_list.json"
         )
 
-        print(f"Writing golden file to {output_path}...", file=sys.stderr)
+        print(f"Writing golden file to {output_path}...")
         with open(output_path, "w") as f:
             json.dump(tools_list, f, indent=2, sort_keys=True)
             f.write("\n")  # Add trailing newline
 
-        print("Done updating golden tools list.", file=sys.stderr)
+        print("Done updating golden tools list.")
 
         # Update LLM cases with token usage baselines
         if not os.environ.get("GEMINI_API_KEY"):
@@ -47,17 +47,17 @@ def main():
 
         cases_path = os.path.join(os.path.dirname(__file__), "llm_cases.json")
         if not os.path.exists(cases_path):
-            print(f"LLM cases file not found at {cases_path}", file=sys.stderr)
+            print(f"LLM cases file not found at {cases_path}")
             return
 
-        print(f"Updating LLM baselines in {cases_path}...", file=sys.stderr)
+        print(f"Updating LLM baselines in {cases_path}...")
         with open(cases_path, "r") as f:
             cases = json.load(f)
 
         tools = tools_list.get("tools", [])
         for case in cases:
             prompt = case["prompt"]
-            print(f"  Processing prompt: '{prompt}'", file=sys.stderr)
+            print(f"  Processing prompt: '{prompt}'")
             try:
                 result = llm_sender.get_llm_response(
                     prompt, tools, include_usage=True
@@ -118,9 +118,9 @@ def main():
             json.dump(cases, f, indent=2)
             f.write("\n")
 
-        print("LLM baselines updated.", file=sys.stderr)
+        print("LLM baselines updated.")
     except Exception as e:
-        print(f"Error: {e}", file=sys.stderr)
+        print(f"Error: {e}")
         sys.exit(1)
 
 

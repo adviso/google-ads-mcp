@@ -39,27 +39,27 @@ def compare_usage(current, baseline, label, threshold=0.05):
 
 def main():
     if not os.environ.get("GEMINI_API_KEY"):
-        print("GEMINI_API_KEY environment variable not set.", file=sys.stderr)
+        print("GEMINI_API_KEY environment variable not set.")
         sys.exit(1)
 
     if llm_sender is None:
-        print("llm_sender is not available.", file=sys.stderr)
+        print("llm_sender is not available.")
         sys.exit(1)
 
     cases_path = os.path.join(os.path.dirname(__file__), "llm_cases.json")
     if not os.path.exists(cases_path):
-        print(f"LLM cases file not found at {cases_path}", file=sys.stderr)
+        print(f"LLM cases file not found at {cases_path}")
         sys.exit(1)
 
     with open(cases_path, "r") as f:
         cases = json.load(f)
 
-    print("Fetching tools list from server...", file=sys.stderr)
+    print("Fetching tools list from server...")
     try:
         tools_response = smoke_utils.get_tools_list()
         tools = tools_response.get("tools", [])
     except Exception as e:
-        print(f"Failed to get tools from server: {e}", file=sys.stderr)
+        print(f"Failed to get tools from server: {e}")
         sys.exit(1)
 
     failures = 0
