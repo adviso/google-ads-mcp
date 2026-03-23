@@ -31,7 +31,7 @@ import os
 import importlib.resources
 
 # filename for generated field information used by search
-_GAQL_FILENAME = "gaql_resources.json"
+_GAQL_FILENAME = "gaql_resources.txt"
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
