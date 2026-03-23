@@ -5,13 +5,20 @@ import time
 from google.genai import types
 from google.genai import Client
 from google.genai import errors
+from tests.smoke import smoke_utils
 
 
-def get_llm_response(prompt: str, tools: list) -> str:
+def get_llm_response(
+    prompt: str | list, tools: list, include_usage: bool = False
+) -> str | dict:
     """Sends a prompt to the LLM with the given tools and returns the tool usage."""
     api_key = os.environ.get("GEMINI_API_KEY")
     if not api_key:
         raise RuntimeError("GEMINI_API_KEY environment variable not set.")
+
+    # Inject customer ID if placeholder is present (only for string prompts)
+    if isinstance(prompt, str):
+        prompt = smoke_utils.inject_customer_id(prompt)
 
     client = Client(api_key=api_key)
 
@@ -58,15 +65,65 @@ def get_llm_response(prompt: str, tools: list) -> str:
             )
 
             if not response.candidates:
+                if include_usage:
+                    return {
+                        "tool_name": None,
+                        "usage": {
+                            "prompt_token_count": response.usage_metadata.prompt_token_count,
+                            "candidates_token_count": response.usage_metadata.candidates_token_count,
+                            "total_token_count": response.usage_metadata.total_token_count,
+                            "thought_token_count": getattr(
+                                response.usage_metadata,
+                                "thought_token_count",
+                                0,
+                            )
+                            or getattr(
+                                response.usage_metadata,
+                                "thoughts_token_count",
+                                0,
+                            ),
+                        },
+                        "model": "gemini-flash-latest",
+                    }
                 return None
 
             candidate = response.candidates[0]
+            selected_tool = None
+            tool_args = None
             # Check for function calls
             for part in candidate.content.parts:
                 if part.function_call:
-                    return part.function_call.name
+                    selected_tool = part.function_call.name
+                    # args is a structure, we can convert to dict or leave as is
+                    # types.FunctionCall.args is usually a dict or dict-like
+                    tool_args = (
+                        dict(part.function_call.args)
+                        if part.function_call.args
+                        else {}
+                    )
+                    break
 
-            return None
+            if include_usage:
+                # usage_metadata is a pydantic-like model, we might want to convert it to dict
+                usage = {
+                    "prompt_token_count": response.usage_metadata.prompt_token_count,
+                    "candidates_token_count": response.usage_metadata.candidates_token_count,
+                    "total_token_count": response.usage_metadata.total_token_count,
+                    "thought_token_count": getattr(
+                        response.usage_metadata, "thought_token_count", 0
+                    )
+                    or getattr(
+                        response.usage_metadata, "thoughts_token_count", 0
+                    ),
+                }
+                return {
+                    "tool_name": selected_tool,
+                    "tool_args": tool_args,
+                    "usage": usage,
+                    "model": "gemini-flash-latest",
+                }
+
+            return selected_tool
 
         except errors.ClientError as e:
             if e.code == 429:
@@ -79,3 +136,17 @@ def get_llm_response(prompt: str, tools: list) -> str:
                     time.sleep(delay)
                     continue
             raise e
+
+
+def count_tokens(contents) -> int:
+    """Counts the number of tokens in the given content using the LLM backend."""
+    api_key = os.environ.get("GEMINI_API_KEY")
+    if not api_key:
+        raise RuntimeError("GEMINI_API_KEY environment variable not set.")
+
+    client = Client(api_key=api_key)
+    response = client.models.count_tokens(
+        model="gemini-flash-latest",
+        contents=contents,
+    )
+    return response.total_tokens
