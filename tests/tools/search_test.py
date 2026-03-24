@@ -92,7 +92,7 @@ class TestSearch(unittest.TestCase):
                 with patch("ads_mcp.utils.logger.error") as mock_log_error:
                     description = search._search_tool_description()
                     self.assertIn(
-                        "WARNING: The table of selectable fields is missing.",
+                        "WARNING: The list of valid resources is missing.",
                         description,
                     )
                     mock_log_error.assert_called_once()

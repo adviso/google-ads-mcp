@@ -54,12 +54,22 @@ class LLMToolSelectionTest(unittest.TestCase):
             try:
                 selected_tool = llm_sender.get_llm_response(prompt, tools)
 
-                if selected_tool != expected_tool:
+                if selected_tool == expected_tool:
+                    print(f"  -> Success: {selected_tool}", file=sys.stderr)
+                elif (
+                    selected_tool == "get_resource_metadata"
+                    and expected_tool == "search"
+                ):
+                    # get_resource_metadata is a valid tool call when we expect an LLM to call search
+                    # as it may not have the metadata info in the prompt or in the context.
+                    print(
+                        f"  -> Success (metadata lookup): {selected_tool}",
+                        file=sys.stderr,
+                    )
+                else:
                     failures.append(
                         f"Prompt: '{prompt}'\n  Expected: {expected_tool}\n  Got: {selected_tool}"
                     )
-                else:
-                    print(f"  -> Success: {selected_tool}", file=sys.stderr)
 
                 # Sleep to avoid rate limits
                 time.sleep(10)
