@@ -1,3 +1,4 @@
+import contextlib
 import json
 import subprocess
 import sys
@@ -50,59 +51,9 @@ def read_response(process: subprocess.Popen) -> Dict[str, Any]:
     raise RuntimeError("Server closed connection without response")
 
 
-def get_tools_list() -> Dict[str, Any]:
-    """Runs the server and retrieves the list of tools."""
-    process = start_server_process()
-    try:
-        # Initialize
-        send_request(
-            process,
-            "initialize",
-            {
-                "protocolVersion": "2024-11-05",
-                "capabilities": {},
-                "clientInfo": {"name": "smoke-test", "version": "1.0"},
-            },
-            req_id=1,
-        )
-
-        # Read initialize response
-        response = read_response(process)
-        if "error" in response:
-            raise RuntimeError(f"Initialize failed: {response['error']}")
-
-        # Send initialized notification
-        send_request(
-            process, "notifications/initialized", req_id=None
-        )  # Notifications don't have ID, but send_request adds it.
-        # Actually notifications shouldn't have ID. Let's send manually or adjust send_request.
-        # But for this simple smoke test, we can just skip the notification usually, or send it correctly.
-        # Let's just request tools/list.
-
-        send_request(process, "tools/list", req_id=2)
-        response = read_response(process)
-
-        if "error" in response:
-            raise RuntimeError(f"tools/list failed: {response['error']}")
-
-        return response["result"]
-    finally:
-        if process.stdin:
-            process.stdin.close()
-        if process.stdout:
-            process.stdout.close()
-        process.terminate()
-        process.wait()
-
-
-def inject_customer_id(prompt: str) -> str:
-    """Replaces {customer_id} placeholder with GOOGLE_ADS_CUSTOMER_ID env var."""
-    customer_id = os.environ.get("GOOGLE_ADS_CUSTOMER_ID", "1234567890")
-    return prompt.replace("{customer_id}", customer_id)
-
-
-def call_tool(name: str, arguments: dict) -> Dict[str, Any]:
-    """Runs the server and calls a specific tool."""
+@contextlib.contextmanager
+def initialized_server():
+    """Context manager that starts, initializes, and cleans up an MCP server process."""
     process = start_server_process()
     try:
         # Initialize
@@ -125,7 +76,49 @@ def call_tool(name: str, arguments: dict) -> Dict[str, Any]:
         # Send initialized notification
         send_request(process, "notifications/initialized", req_id=None)
 
-        # Call tool
+        yield process
+    finally:
+        if process.stdin:
+            process.stdin.close()
+        if process.stdout:
+            process.stdout.close()
+        process.terminate()
+        process.wait()
+
+
+def get_tools_list() -> Dict[str, Any]:
+    """Runs the server and retrieves the list of tools."""
+    with initialized_server() as process:
+        send_request(process, "tools/list", req_id=2)
+        response = read_response(process)
+
+        if "error" in response:
+            raise RuntimeError(f"tools/list failed: {response['error']}")
+
+        return response["result"]
+
+
+def get_resources_list() -> Dict[str, Any]:
+    """Runs the server and retrieves the list of resources."""
+    with initialized_server() as process:
+        send_request(process, "resources/list", req_id=2)
+        response = read_response(process)
+
+        if "error" in response:
+            raise RuntimeError(f"resources/list failed: {response['error']}")
+
+        return response["result"]
+
+
+def inject_customer_id(prompt: str) -> str:
+    """Replaces {customer_id} placeholder with GOOGLE_ADS_CUSTOMER_ID env var."""
+    customer_id = os.environ.get("GOOGLE_ADS_CUSTOMER_ID", "1234567890")
+    return prompt.replace("{customer_id}", customer_id)
+
+
+def call_tool(name: str, arguments: dict) -> Dict[str, Any]:
+    """Runs the server and calls a specific tool."""
+    with initialized_server() as process:
         send_request(
             process,
             "tools/call",
@@ -138,10 +131,3 @@ def call_tool(name: str, arguments: dict) -> Dict[str, Any]:
             raise RuntimeError(f"tools/call failed: {response['error']}")
 
         return response["result"]
-    finally:
-        if process.stdin:
-            process.stdin.close()
-        if process.stdout:
-            process.stdout.close()
-        process.terminate()
-        process.wait()

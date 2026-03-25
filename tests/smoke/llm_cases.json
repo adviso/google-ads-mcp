@@ -66,9 +66,9 @@
     "prompt": "Generate a daily report of clicks for all active campaigns in account {customer_id}.",
     "expected_tool": "search",
     "prompt_tokens": 457,
-    "output_tokens": 57,
-    "thought_tokens": 206,
+    "output_tokens": 20,
+    "thought_tokens": 110,
     "model": "gemini-flash-latest",
-    "tool_tokens": 315
+    "tool_tokens": 10931
   }
 ]

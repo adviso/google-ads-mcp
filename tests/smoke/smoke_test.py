@@ -43,6 +43,43 @@ class SmokeTest(unittest.TestCase):
             diff_msg = "\n".join(diff)
             self.fail(f"Tools list does not match golden file:\n{diff_msg}")
 
+    def test_resources_list_matches_golden(self):
+        """Verifies that the current resources list matches the golden file."""
+        current_resources = smoke_utils.get_resources_list()
+
+        # Sort to ensure deterministic comparison
+        if "resources" in current_resources:
+            current_resources["resources"].sort(key=lambda x: x.get("uri", ""))
+
+        golden_path = os.path.join(
+            os.path.dirname(__file__), "golden_resources_list.json"
+        )
+
+        if not os.path.exists(golden_path):
+            self.fail(
+                f"Golden resources file not found at {golden_path}. Run tests/smoke/generate_golden.py to create it."
+            )
+
+        with open(golden_path, "r") as f:
+            golden_resources = json.load(f)
+
+        # Convert to string for diffing
+        current_str = json.dumps(current_resources, indent=2, sort_keys=True)
+        golden_str = json.dumps(golden_resources, indent=2, sort_keys=True)
+
+        if current_str != golden_str:
+            diff = list(
+                difflib.unified_diff(
+                    golden_str.splitlines(),
+                    current_str.splitlines(),
+                    fromfile="golden_resources_list.json",
+                    tofile="current_resources_list.json",
+                    lineterm="",
+                )
+            )
+            diff_msg = "\n".join(diff)
+            self.fail(f"Resources list does not match golden file:\n{diff_msg}")
+
 
 if __name__ == "__main__":
     unittest.main()
