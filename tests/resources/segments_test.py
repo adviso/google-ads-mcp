@@ -30,6 +30,6 @@ class SegmentsTest(unittest.TestCase):
         self.assertIsInstance(request_obj, urllib.request.Request)
         self.assertEqual(
             request_obj.full_url,
-            "https://developers.google.com/google-ads/api/fields/v23/segments",
+            "https://developers.google.com/google-ads/api/fields/latest/segments",
         )
         self.assertEqual(request_obj.headers.get("User-agent"), "Mozilla/5.0")

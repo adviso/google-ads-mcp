@@ -22,7 +22,7 @@ def get_metrics() -> str:
     Returns:
         str: The metrics documentation in HTML format.
     """
-    url = "https://developers.google.com/google-ads/api/fields/v23/metrics"
+    url = "https://developers.google.com/google-ads/api/fields/latest/metrics"
     req = urllib.request.Request(
         url,
         headers={"User-Agent": "Mozilla/5.0"},

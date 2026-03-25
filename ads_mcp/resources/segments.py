@@ -22,7 +22,7 @@ def get_segments() -> str:
     Returns:
         str: The segments documentation in HTML format.
     """
-    url = "https://developers.google.com/google-ads/api/fields/v23/segments"
+    url = "https://developers.google.com/google-ads/api/fields/latest/segments"
     req = urllib.request.Request(
         url,
         headers={"User-Agent": "Mozilla/5.0"},
