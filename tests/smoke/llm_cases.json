@@ -69,6 +69,6 @@
     "output_tokens": 57,
     "thought_tokens": 206,
     "model": "gemini-flash-latest",
-    "tool_tokens": 315
+    "tool_tokens": 309
   }
 ]

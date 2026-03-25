@@ -30,6 +30,25 @@ def main():
 
         print("Done updating golden tools list.")
 
+        # Resources
+        print("Fetching resources list from server...")
+        resources_list = smoke_utils.get_resources_list()
+
+        # Sort resources by URI to ensure deterministic output
+        if "resources" in resources_list:
+            resources_list["resources"].sort(key=lambda x: x.get("uri", ""))
+
+        resources_output_path = os.path.join(
+            os.path.dirname(__file__), "golden_resources_list.json"
+        )
+
+        print(f"Writing golden resources file to {resources_output_path}...")
+        with open(resources_output_path, "w") as f:
+            json.dump(resources_list, f, indent=2, sort_keys=True)
+            f.write("\n")
+
+        print("Done updating golden resources list.")
+
         # Update LLM cases with token usage baselines
         if not os.environ.get("GEMINI_API_KEY"):
             print(
