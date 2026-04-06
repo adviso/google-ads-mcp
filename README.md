@@ -243,6 +243,44 @@ How many active campaigns do I have for customer id 1234567890
 ```
 
 
+## Authentication Setup (WorkOS AuthKit)
+
+The MCP server supports optional user authentication via
+[WorkOS AuthKit](https://workos.com/docs/authkit/mcp) as an OAuth 2.1
+Authorization Server. When enabled, every MCP request must include a valid
+JWT in the `Authorization: Bearer <token>` header.
+
+Authentication is **opt-in**: if the environment variables below are not set,
+the server starts without auth (backward compatible).
+
+### WorkOS Dashboard Configuration
+
+1. Create a [WorkOS](https://workos.com/) account and note your AuthKit
+   subdomain (e.g. `adviso.authkit.app`).
+2. **Enable CIMD**: Dashboard → Connect → Configuration → Enable
+   *Client ID Metadata Document*. This lets MCP clients (VS Code, Claude
+   Desktop) identify themselves without prior registration.
+3. **Enable Google provider**: Dashboard → Authentication → Social Login →
+   Google. You will need Google Cloud OAuth credentials.
+4. *(Optional)* Enable DCR (Dynamic Client Registration) for clients that
+   don't support CIMD.
+
+### Environment Variables
+
+| Variable | Description | Example |
+| --- | --- | --- |
+| `WORKOS_AUTHKIT_ISSUER_URL` | AuthKit issuer URL | `https://adviso.authkit.app` |
+| `GOOGLE_ADS_MCP_SERVER_URL` | Public URL of this MCP server (for RFC 9728 resource metadata) | `https://mcp.example.com` |
+
+Both must be set to activate authentication.
+
+### Verifying Authentication
+
+Once configured, the server exposes
+`GET /.well-known/oauth-protected-resource` returning the resource metadata
+(RFC 9728). Clients that support MCP auth will automatically discover the
+WorkOS authorization server and initiate the OAuth flow.
+
 ## Contributing
 
 Contributions welcome! See the [Contributing Guide](CONTRIBUTING.md).
