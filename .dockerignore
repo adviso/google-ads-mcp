@@ -1,0 +1,10 @@
+.venv
+.env
+.env.*
+tests
+__pycache__
+*.egg-info
+.git
+.gitignore
+.nox
+*.pyc
