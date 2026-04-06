@@ -56,18 +56,17 @@ def get_user_id(ctx: Context) -> str:
 
 
 def _get_developer_token() -> str:
-    """Returns the developer token from the environment variable GOOGLE_ADS_DEVELOPER_TOKEN."""
-    dev_token = os.environ.get("GOOGLE_ADS_DEVELOPER_TOKEN")
-    if dev_token is None:
-        raise ValueError(
-            "GOOGLE_ADS_DEVELOPER_TOKEN environment variable not set."
-        )
-    return dev_token
+    """Returns the developer token from env or GCP Secret Manager."""
+    from ads_mcp.gcp_secrets import require_secret
+
+    return require_secret("GOOGLE_ADS_DEVELOPER_TOKEN")
 
 
 def _get_login_customer_id() -> str | None:
-    """Returns login customer id, if set, from the environment variable GOOGLE_ADS_LOGIN_CUSTOMER_ID."""
-    return os.environ.get("GOOGLE_ADS_LOGIN_CUSTOMER_ID")
+    """Returns login customer id from env or GCP Secret Manager."""
+    from ads_mcp.gcp_secrets import get_secret
+
+    return get_secret("GOOGLE_ADS_LOGIN_CUSTOMER_ID")
 
 
 def _get_googleads_client(user_id: str) -> GoogleAdsClient:

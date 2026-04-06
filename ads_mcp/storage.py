@@ -31,14 +31,14 @@ def _validate_user_id(user_id: str) -> None:
 
 
 def _get_encryption_key() -> bytes:
-    """Read and validate ENCRYPTION_KEY from environment."""
+    """Read and validate ENCRYPTION_KEY from env or GCP Secret Manager."""
     global _encryption_key
     if _encryption_key is not None:
         return _encryption_key
 
-    raw = os.environ.get("ENCRYPTION_KEY")
-    if not raw:
-        raise ValueError("ENCRYPTION_KEY environment variable is required")
+    from ads_mcp.gcp_secrets import require_secret
+
+    raw = require_secret("ENCRYPTION_KEY")
 
     try:
         key = base64.b64decode(raw)
