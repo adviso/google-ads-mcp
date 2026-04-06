@@ -16,6 +16,7 @@
 
 from typing import Any, Dict, List
 from ads_mcp.coordinator import mcp
+from mcp.server.fastmcp import Context
 import ads_mcp.utils as utils
 
 
@@ -23,6 +24,7 @@ def search(
     customer_id: str,
     fields: List[str],
     resource: str,
+    ctx: Context,
     conditions: List[str] = None,
     orderings: List[str] = None,
     limit: int | str = None,
@@ -33,13 +35,14 @@ def search(
         customer_id: The id of the customer
         fields: The fields to fetch
         resource: The resource to return fields from
+        ctx: MCP context (injected automatically)
         conditions: List of conditions to filter the data, combined using AND clauses
         orderings: How the data is ordered
         limit: The maximum number of rows to return
 
     """
-
-    ga_service = utils.get_googleads_service("GoogleAdsService")
+    user_id = utils.get_user_id(ctx)
+    ga_service = utils.get_googleads_service("GoogleAdsService", user_id)
 
     query_parts = [f"SELECT {','.join(fields)} FROM {resource}"]
 

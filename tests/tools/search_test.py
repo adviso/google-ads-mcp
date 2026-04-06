@@ -42,11 +42,14 @@ class TestSearch(unittest.TestCase):
             {"id": 2, "name": "C2"},
         ]
 
-        # Call search
+        # Call search with mock Context
+        mock_ctx = MagicMock()
+        mock_ctx.client_id = "test_user"
         results = search.search(
             customer_id="1234567890",
             fields=["campaign.id", "campaign.name"],
             resource="campaign",
+            ctx=mock_ctx,
             conditions=["campaign.status = 'ENABLED'"],
             orderings=["campaign.name ASC"],
             limit=10,

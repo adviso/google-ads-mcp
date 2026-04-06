@@ -86,7 +86,7 @@ class TestWorkOSTokenVerifier(unittest.TestCase):
         result = self._run(self.verifier.verify_token(token))
 
         self.assertIsNotNone(result)
-        self.assertEqual(result.client_id, "client_abc")
+        self.assertEqual(result.client_id, "user_123")
         self.assertEqual(result.scopes, ["openid", "profile", "email"])
         self.assertIsNotNone(result.expires_at)
         self.assertEqual(result.token, token)
@@ -113,8 +113,8 @@ class TestWorkOSTokenVerifier(unittest.TestCase):
 
         self.assertIsNone(result)
 
-    def test_no_azp_falls_back_to_sub(self):
-        """When azp is missing, client_id falls back to sub."""
+    def test_sub_used_as_client_id(self):
+        """client_id is always taken from sub claim."""
         token = _make_jwt({"sub": "user_456"})
         payload = pyjwt.decode(token, options={"verify_signature": False})
         del payload["azp"]
