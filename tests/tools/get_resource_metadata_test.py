@@ -45,7 +45,9 @@ class TestGetResourceMetadata(unittest.TestCase):
 
         mock_service.search_google_ads_fields.return_value = [f1, f2, f3]
 
-        result = get_resource_metadata.get_resource_metadata("campaign")
+        mock_ctx = MagicMock()
+        mock_ctx.client_id = "test_user"
+        result = get_resource_metadata.get_resource_metadata("campaign", ctx=mock_ctx)
 
         # Verify query construction
         expected_query = (
@@ -84,7 +86,9 @@ class TestGetResourceMetadata(unittest.TestCase):
             [f1],
         ]
 
-        result = get_resource_metadata.get_resource_metadata("campaign")
+        mock_ctx = MagicMock()
+        mock_ctx.client_id = "test_user"
+        result = get_resource_metadata.get_resource_metadata("campaign", ctx=mock_ctx)
 
         # Verify queries - last set query on mock_request should be the fallback one
         self.assertEqual(
@@ -110,8 +114,10 @@ class TestGetResourceMetadata(unittest.TestCase):
             Exception("Fail 2"),
         ]
 
+        mock_ctx = MagicMock()
+        mock_ctx.client_id = "test_user"
         with self.assertRaises(RuntimeError) as cm:
-            get_resource_metadata.get_resource_metadata("campaign")
+            get_resource_metadata.get_resource_metadata("campaign", ctx=mock_ctx)
 
         self.assertIn(
             "API call to search_google_ads_fields failed: Fail 2",

@@ -21,7 +21,8 @@ from unittest import mock
 class TestServerInitialization(unittest.TestCase):
     """Test cases for the server module."""
 
-    def test_server_initialization(self):
+    @mock.patch("ads_mcp.storage.init_db")
+    def test_server_initialization(self, mock_init_db):
         """Tests that the MCP server instance is initialized.
 
         This servers as a smoke test to confirm there are no obvious issues
@@ -31,6 +32,7 @@ class TestServerInitialization(unittest.TestCase):
 
         self.assertIsNotNone(server.mcp, "MCP server instance not initialized")
 
+    @mock.patch("ads_mcp.storage.init_db")
     @mock.patch.dict(
         "os.environ",
         {
@@ -38,7 +40,7 @@ class TestServerInitialization(unittest.TestCase):
             "GOOGLE_ADS_MCP_SERVER_URL": "https://mcp.example.com",
         },
     )
-    def test_server_initialization_with_workos_auth(self):
+    def test_server_initialization_with_workos_auth(self, mock_init_db):
         """Tests that the MCP server initializes with WorkOS auth env vars."""
         import importlib
         from ads_mcp import workos_auth, coordinator, server

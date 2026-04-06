@@ -4,8 +4,10 @@ import logging
 import os
 
 import ads_mcp.storage as storage
+import ads_mcp.utils as utils
 import google_auth_oauthlib.flow
 from ads_mcp.coordinator import mcp
+from mcp.server.fastmcp import Context
 
 logger = logging.getLogger(__name__)
 
@@ -29,7 +31,7 @@ def _get_redirect_uri() -> str:
 
 
 @mcp.tool()
-def start_google_ads_auth() -> str:
+def start_google_ads_auth(ctx: Context) -> str:
     """Start the Google Ads OAuth authentication flow.
 
     Returns an authorization URL that the user must open in their browser.
@@ -37,6 +39,8 @@ def start_google_ads_auth() -> str:
     show a connection error — that's expected). The user must copy the full URL
     from the browser address bar and pass it to complete_google_ads_auth.
     """
+    user_id = utils.get_user_id(ctx)
+
     try:
         client_config = _get_client_config()
     except KeyError as e:
@@ -55,7 +59,7 @@ def start_google_ads_auth() -> str:
         prompt="consent",
     )
 
-    storage.save_pending_auth(state, flow.code_verifier, SCOPES)
+    storage.save_pending_auth(user_id, state, flow.code_verifier, SCOPES)
 
     return (
         f"Open this URL in your browser to authenticate:\n\n{authorization_url}\n\n"
@@ -67,14 +71,15 @@ def start_google_ads_auth() -> str:
 
 
 @mcp.tool()
-def complete_google_ads_auth(callback_url: str) -> str:
+def complete_google_ads_auth(callback_url: str, ctx: Context) -> str:
     """Complete the Google Ads OAuth flow by exchanging the authorization code for tokens.
 
     Args:
         callback_url: The full URL from the browser address bar after the OAuth redirect.
                       Contains the authorization code and state parameters.
     """
-    pending = storage.load_pending_auth()
+    user_id = utils.get_user_id(ctx)
+    pending = storage.load_pending_auth(user_id)
     if pending is None:
         return (
             "No pending authentication found. "
@@ -130,8 +135,8 @@ def complete_google_ads_auth(callback_url: str) -> str:
         "scopes": list(credentials.scopes or []),
         "granted_scopes": list(credentials.granted_scopes or []),
     }
-    storage.save_tokens(credentials_data)
-    storage.clear_pending_auth()
+    storage.save_tokens(user_id, credentials_data)
+    storage.clear_pending_auth(user_id)
 
     return (
         f"Authentication successful!\n"

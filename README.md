@@ -271,8 +271,23 @@ the server starts without auth (backward compatible).
 | --- | --- | --- |
 | `WORKOS_AUTHKIT_ISSUER_URL` | AuthKit issuer URL | `https://adviso.authkit.app` |
 | `GOOGLE_ADS_MCP_SERVER_URL` | Public URL of this MCP server (for RFC 9728 resource metadata) | `https://mcp.example.com` |
+| `ENCRYPTION_KEY` | AES-256-GCM key for encrypting credentials at rest (32 bytes, base64-encoded). **Required.** | See below |
 
-Both must be set to activate authentication.
+`WORKOS_AUTHKIT_ISSUER_URL` and `GOOGLE_ADS_MCP_SERVER_URL` must both be set to activate authentication.
+`ENCRYPTION_KEY` is always required — the server refuses to start without it.
+
+Generate a key:
+
+```shell
+python -c "import base64, os; print(base64.b64encode(os.urandom(32)).decode())"
+```
+
+### Multi-user storage
+
+The server stores OAuth credentials in a SQLite database (`credentials.db`)
+located in `GOOGLE_ADS_MCP_DATA_DIR` (default `~/.google_ads_mcp/`). Each
+WorkOS user (identified by the JWT `sub` claim) has their own encrypted
+credential entry. Tokens are encrypted at rest using AES-256-GCM.
 
 ### Verifying Authentication
 

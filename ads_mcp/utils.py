@@ -19,6 +19,8 @@
 from typing import Any
 import proto
 import logging
+from mcp.server.auth.middleware.auth_context import get_access_token
+from mcp.server.fastmcp import Context
 from google.ads.googleads.client import GoogleAdsClient
 from google.ads.googleads.v23.services.services.google_ads_service import (
     GoogleAdsServiceClient,
@@ -36,6 +38,22 @@ _GAQL_FILENAME = "gaql_resources.txt"
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
 
+# Fallback user ID when WorkOS auth is not configured (single-user mode).
+_DEFAULT_USER_ID = "default"
+
+
+def get_user_id(ctx: Context) -> str:
+    """Extract authenticated user_id from the verified AccessToken.
+
+    Uses the cryptographically verified AccessToken from the auth middleware
+    (WorkOS JWT sub claim), not the unverified ctx.client_id from request _meta.
+    Falls back to a single-user default when auth is not active.
+    """
+    access_token = get_access_token()
+    if access_token and access_token.client_id:
+        return access_token.client_id
+    return _DEFAULT_USER_ID
+
 
 def _get_developer_token() -> str:
     """Returns the developer token from the environment variable GOOGLE_ADS_DEVELOPER_TOKEN."""
@@ -52,8 +70,8 @@ def _get_login_customer_id() -> str | None:
     return os.environ.get("GOOGLE_ADS_LOGIN_CUSTOMER_ID")
 
 
-def _get_googleads_client() -> GoogleAdsClient:
-    tokens = storage.load_tokens()
+def _get_googleads_client(user_id: str) -> GoogleAdsClient:
+    tokens = storage.load_tokens(user_id)
     if tokens is None:
         raise RuntimeError(
             "No OAuth tokens found. Run the start_google_ads_auth tool first."
@@ -71,18 +89,18 @@ def _get_googleads_client() -> GoogleAdsClient:
     return GoogleAdsClient.load_from_dict(config)
 
 
-def get_googleads_service(serviceName: str) -> GoogleAdsServiceClient:
-    return _get_googleads_client().get_service(
+def get_googleads_service(serviceName: str, user_id: str) -> GoogleAdsServiceClient:
+    return _get_googleads_client(user_id).get_service(
         serviceName, interceptors=[MCPHeaderInterceptor()]
     )
 
 
-def get_googleads_type(typeName: str):
-    return _get_googleads_client().get_type(typeName)
+def get_googleads_type(typeName: str, user_id: str):
+    return _get_googleads_client(user_id).get_type(typeName)
 
 
-def get_googleads_client():
-    return _get_googleads_client()
+def get_googleads_client(user_id: str):
+    return _get_googleads_client(user_id)
 
 
 def format_output_value(value: Any) -> Any:

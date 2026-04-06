@@ -36,7 +36,7 @@ class WorkOSTokenVerifier:
             )
             return AccessToken(
                 token=token,
-                client_id=payload.get("azp", payload.get("sub", "unknown")),
+                client_id=payload.get("sub", "unknown"),
                 scopes=payload.get("scope", "").split() if payload.get("scope") else [],
                 expires_at=payload.get("exp"),
             )

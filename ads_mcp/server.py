@@ -15,6 +15,7 @@
 """Entry point for the MCP server."""
 
 from ads_mcp.coordinator import mcp
+import ads_mcp.storage as storage
 
 # The following imports are necessary to register the tools with the `mcp`
 # object, even though they are not directly used in this file.
@@ -30,6 +31,7 @@ from ads_mcp.resources import (
 
 
 def run_server() -> None:
+    storage.init_db()
     mcp.run(transport="streamable-http")
 
 

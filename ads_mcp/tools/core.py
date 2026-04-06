@@ -16,6 +16,7 @@
 
 from typing import List
 from ads_mcp.coordinator import mcp
+from mcp.server.fastmcp import Context
 
 import ads_mcp.utils as utils
 
@@ -25,9 +26,10 @@ from google.ads.googleads.v21.services.types.customer_service import (
 
 
 @mcp.tool()
-def list_accessible_customers() -> List[str]:
+def list_accessible_customers(ctx: Context) -> List[str]:
     """Returns ids of customers directly accessible by the user authenticating the call."""
-    ga_service = utils.get_googleads_service("CustomerService")
+    user_id = utils.get_user_id(ctx)
+    ga_service = utils.get_googleads_service("CustomerService", user_id)
     accessible_customers: ListAccessibleCustomersResponse = (
         ga_service.list_accessible_customers()
     )
