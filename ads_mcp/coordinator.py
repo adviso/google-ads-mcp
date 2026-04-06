@@ -19,6 +19,12 @@ server using `@mcp.tool` annotations, thereby 'coordinating' the bootstrapping
 of the server.
 """
 
+import os
+
 from mcp.server.fastmcp import FastMCP
 
-mcp = FastMCP("Google Ads Server")
+mcp = FastMCP(
+    "Google Ads Server",
+    host="0.0.0.0",
+    port=int(os.getenv("GOOGLE_ADS_MCP_PORT", "8000")),
+)
