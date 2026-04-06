@@ -25,8 +25,8 @@ from google.ads.googleads.v23.services.services.google_ads_service import (
 )
 
 from google.ads.googleads.util import get_nested_attr
-import google.auth
 from ads_mcp.mcp_header_interceptor import MCPHeaderInterceptor
+import ads_mcp.storage as storage
 import os
 import importlib.resources
 
@@ -35,15 +35,6 @@ _GAQL_FILENAME = "gaql_resources.txt"
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
-
-# Read-only scope for Analytics Admin API and Analytics Data API.
-_READ_ONLY_ADS_SCOPE = "https://www.googleapis.com/auth/adwords"
-
-
-def _create_credentials() -> google.auth.credentials.Credentials:
-    """Returns Application Default Credentials with read-only scope."""
-    credentials, _ = google.auth.default(scopes=[_READ_ONLY_ADS_SCOPE])
-    return credentials
 
 
 def _get_developer_token() -> str:
@@ -62,21 +53,22 @@ def _get_login_customer_id() -> str | None:
 
 
 def _get_googleads_client() -> GoogleAdsClient:
-    args = {
-        "credentials": _create_credentials(),
+    tokens = storage.load_tokens()
+    if tokens is None:
+        raise RuntimeError(
+            "No OAuth tokens found. Run the start_google_ads_auth tool first."
+        )
+    config = {
+        "refresh_token": tokens["refresh_token"],
+        "client_id": tokens["client_id"],
+        "client_secret": tokens["client_secret"],
         "developer_token": _get_developer_token(),
         "use_proto_plus": True,
     }
-
-    # If the login-customer-id is not set, avoid setting None.
     login_customer_id = _get_login_customer_id()
-
     if login_customer_id:
-        args["login_customer_id"] = login_customer_id
-
-    client = GoogleAdsClient(**args)
-
-    return client
+        config["login_customer_id"] = login_customer_id
+    return GoogleAdsClient.load_from_dict(config)
 
 
 def get_googleads_service(serviceName: str) -> GoogleAdsServiceClient:
