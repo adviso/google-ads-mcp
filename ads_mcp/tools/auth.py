@@ -3,11 +3,13 @@
 import logging
 import os
 
+import google_auth_oauthlib.flow
+from mcp.server.fastmcp import Context
+
 import ads_mcp.storage as storage
 import ads_mcp.utils as utils
-import google_auth_oauthlib.flow
 from ads_mcp.coordinator import mcp
-from mcp.server.fastmcp import Context
+from ads_mcp.environment import environment
 
 logger = logging.getLogger(__name__)
 
@@ -29,7 +31,13 @@ def _get_client_config() -> dict:
 
 
 def _get_redirect_uri() -> str:
-    return f"{os.environ.get('GOOGLE_ADS_MCP_HOST', 'http://localhost:3000')}/oauth/callback"
+    return f"{environment.get('GOOGLE_ADS_MCP_SERVER_URL')}/oauth/callback"
+
+
+def _allow_insecure_transport_for_localhost(redirect_uri: str) -> None:
+    """oauthlib rejects http:// by default; localhost OAuth redirects need this in dev."""
+    if redirect_uri.startswith(("http://localhost", "http://127.0.0.1")):
+        os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
 
 
 @mcp.tool()
@@ -102,6 +110,8 @@ def complete_google_ads_auth(callback_url: str, ctx: Context) -> str:
         code_verifier=pending["code_verifier"],
     )
     flow.redirect_uri = redirect_uri
+
+    _allow_insecure_transport_for_localhost(redirect_uri)
 
     try:
         flow.fetch_token(authorization_response=callback_url)
