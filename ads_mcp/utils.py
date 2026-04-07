@@ -16,21 +16,22 @@
 
 """Common utilities used by the MCP server."""
 
-from typing import Any
-import proto
+import importlib.resources
 import logging
-from mcp.server.auth.middleware.auth_context import get_access_token
-from mcp.server.fastmcp import Context
+from typing import Any
+
+import proto
 from google.ads.googleads.client import GoogleAdsClient
+from google.ads.googleads.util import get_nested_attr
 from google.ads.googleads.v23.services.services.google_ads_service import (
     GoogleAdsServiceClient,
 )
+from mcp.server.auth.middleware.auth_context import get_access_token
+from mcp.server.fastmcp import Context
 
-from google.ads.googleads.util import get_nested_attr
-from ads_mcp.mcp_header_interceptor import MCPHeaderInterceptor
 import ads_mcp.storage as storage
-import os
-import importlib.resources
+from ads_mcp.environment import environment
+from ads_mcp.mcp_header_interceptor import MCPHeaderInterceptor
 
 # filename for generated field information used by search
 _GAQL_FILENAME = "gaql_resources.txt"
@@ -57,16 +58,18 @@ def get_user_id(ctx: Context) -> str:
 
 def _get_developer_token() -> str:
     """Returns the developer token from env or GCP Secret Manager."""
-    from ads_mcp.gcp_secrets import require_secret
-
-    return require_secret("GOOGLE_ADS_DEVELOPER_TOKEN")
+    value = environment.get("GOOGLE_ADS_DEVELOPER_TOKEN")
+    if value is None:
+        raise ValueError("GOOGLE_ADS_DEVELOPER_TOKEN is not set")
+    return value
 
 
 def _get_login_customer_id() -> str | None:
     """Returns login customer id from env or GCP Secret Manager."""
-    from ads_mcp.gcp_secrets import get_secret
-
-    return get_secret("GOOGLE_ADS_LOGIN_CUSTOMER_ID")
+    value = environment.get("GOOGLE_ADS_LOGIN_CUSTOMER_ID")
+    if value is None:
+        raise ValueError("GOOGLE_ADS_LOGIN_CUSTOMER_ID is not set")
+    return value
 
 
 def _get_googleads_client(user_id: str) -> GoogleAdsClient:
@@ -111,8 +114,7 @@ def format_output_value(value: Any) -> Any:
 
 def format_output_row(row: proto.Message, attributes):
     return {
-        attr: format_output_value(get_nested_attr(row, attr))
-        for attr in attributes
+        attr: format_output_value(get_nested_attr(row, attr)) for attr in attributes
     }
 
 
