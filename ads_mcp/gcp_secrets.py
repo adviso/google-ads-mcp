@@ -4,17 +4,19 @@ import logging
 import os
 from functools import lru_cache
 
+from ads_mcp.environment import environment
+
 _logger = logging.getLogger(__name__)
 
 _SECRET_MAP = {
-    "ENCRYPTION_KEY": "adviso-encryption-key",
+    "ADVISO_ENCRYPTION_KEY": "adviso-encryption-key",
     "GOOGLE_ADS_DEVELOPER_TOKEN": "google-ads-developer-token",
     "GOOGLE_CLIENT_ID": "google-ads-client-id",
     "GOOGLE_CLIENT_SECRET": "google-ads-client-secret",
     "GOOGLE_ADS_LOGIN_CUSTOMER_ID": "google-ads-login-customer-id",
 }
 
-_GCP_PROJECT = os.getenv("GCP_PROJECT", "adviso-chat-staging")
+_GCP_PROJECT = environment.get("GCP_PROJECT")
 
 
 @lru_cache(maxsize=None)
@@ -44,7 +46,9 @@ def get_secret(env_key: str) -> str | None:
         response = client.access_secret_version(request={"name": name})
         return response.payload.data.decode("UTF-8")
     except Exception:
-        _logger.warning("Failed to fetch secret %s from Secret Manager", gcp_name, exc_info=True)
+        _logger.warning(
+            "Failed to fetch secret %s from Secret Manager", gcp_name, exc_info=True
+        )
         return None
 
 

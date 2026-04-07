@@ -21,7 +21,7 @@ class TestStorage(unittest.TestCase):
     def setUp(self):
         self.test_key = _make_test_key()
         self.env_patch = mock.patch.dict(
-            "os.environ", {"ENCRYPTION_KEY": self.test_key}
+            "os.environ", {"ADVISO_ENCRYPTION_KEY": self.test_key}
         )
         self.env_patch.start()
         self._tmp = tempfile.NamedTemporaryFile(suffix=".db", delete=False)
@@ -55,13 +55,15 @@ class TestStorage(unittest.TestCase):
         with mock.patch.dict("os.environ", {}, clear=True):
             with self.assertRaises(ValueError) as cm:
                 storage.init_db(db_path=":memory:")
-            self.assertIn("ENCRYPTION_KEY environment variable is required", str(cm.exception))
+            self.assertIn(
+                "ENCRYPTION_KEY environment variable is required", str(cm.exception)
+            )
 
     def test_init_db_raises_with_invalid_key_size(self):
         """init_db raises ValueError when key is not 32 bytes."""
         storage._encryption_key = None
         bad_key = base64.b64encode(os.urandom(16)).decode()
-        with mock.patch.dict("os.environ", {"ENCRYPTION_KEY": bad_key}):
+        with mock.patch.dict("os.environ", {"ADVISO_ENCRYPTION_KEY": bad_key}):
             with self.assertRaises(ValueError) as cm:
                 storage.init_db(db_path=":memory:")
             self.assertIn("ENCRYPTION_KEY must be 32 bytes", str(cm.exception))
@@ -130,11 +132,14 @@ class TestStorage(unittest.TestCase):
         self.assertIsInstance(raw, bytes)
         with self.assertRaises(Exception):
             import json
+
             json.loads(raw)
 
     def test_save_load_pending_auth_roundtrip(self):
         """save_pending_auth then load_pending_auth returns correct data."""
-        storage.save_pending_auth("user_1", "state_abc", "verifier_xyz", ["scope1", "scope2"])
+        storage.save_pending_auth(
+            "user_1", "state_abc", "verifier_xyz", ["scope1", "scope2"]
+        )
         loaded = storage.load_pending_auth("user_1")
         self.assertIsNotNone(loaded)
         self.assertEqual(loaded["state"], "state_abc")

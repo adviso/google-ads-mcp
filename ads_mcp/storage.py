@@ -9,9 +9,9 @@ import logging
 import os
 import sqlite3
 import stat
+from pathlib import Path
 
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
-from pathlib import Path
 
 logger = logging.getLogger(__name__)
 
@@ -38,7 +38,7 @@ def _get_encryption_key() -> bytes:
 
     from ads_mcp.gcp_secrets import require_secret
 
-    raw = require_secret("ENCRYPTION_KEY")
+    raw = require_secret("ADVISO_ENCRYPTION_KEY")
 
     try:
         key = base64.b64decode(raw)
