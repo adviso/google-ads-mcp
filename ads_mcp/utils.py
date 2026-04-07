@@ -76,7 +76,7 @@ def _get_googleads_client(user_id: str) -> GoogleAdsClient:
     tokens = storage.load_tokens(user_id)
     if tokens is None:
         raise RuntimeError(
-            "No OAuth tokens found. Run the start_google_ads_auth tool first."
+            "No OAuth tokens found. Run the auth_google_ads tool first."
         )
     config = {
         "refresh_token": tokens["refresh_token"],

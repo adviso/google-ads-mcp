@@ -225,6 +225,31 @@ def load_pending_auth(user_id: str) -> dict | None:
     }
 
 
+def load_pending_auth_by_state(state: str) -> tuple[str, dict] | None:
+    """Look up pending auth by OAuth state parameter. Returns (user_id, auth_data) or None."""
+    conn = _get_connection()
+    try:
+        row = conn.execute(
+            """SELECT user_id, state, code_verifier, scopes, created_at
+            FROM pending_auth WHERE state = ? AND expires_at > datetime('now')""",
+            (state,),
+        ).fetchone()
+    finally:
+        conn.close()
+
+    if row is None:
+        return None
+    return (
+        row[0],
+        {
+            "state": row[1],
+            "code_verifier": row[2],
+            "scopes": json.loads(row[3]),
+            "created_at": row[4],
+        },
+    )
+
+
 def clear_pending_auth(user_id: str) -> None:
     """Delete pending auth for a user."""
     _validate_user_id(user_id)

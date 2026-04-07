@@ -37,7 +37,7 @@ class Environment:
         for variable in VARIABLES:
             if self.get(variable) is None:
                 raise ValueError(f"Environment variable {variable} is not set")
-            if self.get(variable) == "":
+            if self.get(variable) == "" and variable != "GOOGLE_ADS_MCP_SERVER_PATH":
                 raise ValueError(f"Environment variable {variable} is empty")
 
     def get(self, variable: str) -> str | None:
