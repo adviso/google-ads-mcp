@@ -95,8 +95,11 @@ def init_db(db_path: str | None = None) -> None:
             os.environ.get("GOOGLE_ADS_MCP_DATA_DIR", "~/.google_ads_mcp")
         ).expanduser()
         data_dir.mkdir(parents=True, exist_ok=True)
-        # Restrict directory to owner only
-        os.chmod(data_dir, stat.S_IRWXU)
+        # Restrict directory to owner only (best-effort: may fail on Docker volumes)
+        try:
+            os.chmod(data_dir, stat.S_IRWXU)
+        except PermissionError:
+            pass
         db_path = str(data_dir / "credentials.db")
 
     _db_path = db_path

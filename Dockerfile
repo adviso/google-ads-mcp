@@ -12,6 +12,8 @@ RUN uv sync --frozen --no-dev --no-install-project
 COPY . .
 RUN chown -R appuser:appuser /app
 
+RUN mkdir -p /home/appuser/.google_ads_mcp && chown appuser:appuser /home/appuser/.google_ads_mcp
+
 USER appuser
 
 EXPOSE 8000
