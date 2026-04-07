@@ -37,13 +37,15 @@ class TestServerInitialization(unittest.TestCase):
         "os.environ",
         {
             "WORKOS_AUTHKIT_ISSUER_URL": "https://test.authkit.app",
-            "GOOGLE_ADS_MCP_SERVER_URL": "https://mcp.example.com",
+            "GOOGLE_ADS_MCP_SERVER_HOST": "https://mcp.example.com",
+            "GOOGLE_ADS_MCP_SEVER_PATH": "/google/ads",
         },
     )
     def test_server_initialization_with_workos_auth(self, mock_init_db):
         """Tests that the MCP server initializes with WorkOS auth env vars."""
         import importlib
-        from ads_mcp import workos_auth, coordinator, server
+
+        from ads_mcp import coordinator, server, workos_auth
 
         importlib.reload(workos_auth)
         importlib.reload(coordinator)
