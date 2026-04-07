@@ -1,3 +1,5 @@
+# Requires an Application Default Credentials to get secrets from GCP Secret Manager
+
 FROM python:3.13-slim
 
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
@@ -18,4 +20,4 @@ USER appuser
 
 EXPOSE 8000
 
-CMD ["uv", "run", "python", "-m", "ads_mcp.server"]
+CMD ["uv", "run", "google-ads-mcp"]
