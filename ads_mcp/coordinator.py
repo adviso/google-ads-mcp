@@ -26,10 +26,13 @@ from mcp.server.fastmcp import FastMCP
 from pydantic import AnyHttpUrl
 
 from ads_mcp.environment import environment
+from ads_mcp.gcp_secrets import secret_manager
 from ads_mcp.workos_auth import WorkOSTokenVerifier
 
 _logger = logging.getLogger(__name__)
 _auth_kwargs = {}
+
+secret_manager.init_secrets()
 
 _name = "Google Ads Server"
 _host = "0.0.0.0"

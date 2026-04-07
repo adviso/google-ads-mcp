@@ -1,0 +1,12 @@
+services:
+  google-ads-mcp:
+    build: .
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env.local
+    # volumes:
+    #   - google-ads-mcp-data:/home/appuser/.google_ads_mcp
+
+# volumes:
+#   google-ads-mcp-data:

@@ -32,7 +32,6 @@ class Environment:
                     if value is not None
                 ]
             )
-        print(self.variables)
 
     def validate(self) -> None:
         for variable in VARIABLES:

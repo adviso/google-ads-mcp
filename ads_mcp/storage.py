@@ -13,6 +13,8 @@ from pathlib import Path
 
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 
+from ads_mcp.environment import environment
+
 logger = logging.getLogger(__name__)
 
 _db_path: str | None = None
@@ -36,9 +38,7 @@ def _get_encryption_key() -> bytes:
     if _encryption_key is not None:
         return _encryption_key
 
-    from ads_mcp.gcp_secrets import require_secret
-
-    raw = require_secret("ADVISO_ENCRYPTION_KEY")
+    raw = str(environment.get("ADVISO_ENCRYPTION_KEY"))
 
     try:
         key = base64.b64decode(raw)

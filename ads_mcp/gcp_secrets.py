@@ -19,45 +19,34 @@ _SECRET_MAP = {
 _GCP_PROJECT = environment.get("GCP_PROJECT")
 
 
-@lru_cache(maxsize=None)
-def _get_client():
-    from google.cloud import secretmanager
+class SecretManager:
+    @lru_cache(maxsize=None)
+    def __init__(self):
+        from google.cloud import secretmanager
 
-    return secretmanager.SecretManagerServiceClient()
+        self.client = secretmanager.SecretManagerServiceClient()
 
+    def get_secret(self, env_key: str) -> str | None:
+        gcp_name = _SECRET_MAP.get(env_key)
+        if gcp_name is None:
+            return None
 
-def get_secret(env_key: str) -> str | None:
-    """Fetch a secret by its env var name.
+        try:
+            client = self.client
+            name = f"projects/{_GCP_PROJECT}/secrets/{gcp_name}/versions/latest"
+            response = client.access_secret_version(request={"name": name})
+            return response.payload.data.decode("UTF-8")
+        except Exception:
+            _logger.warning(
+                "Failed to fetch secret %s from Secret Manager", gcp_name, exc_info=True
+            )
+            return None
 
-    Tries env var first (for local dev), then GCP Secret Manager.
-    Returns None if not found in either.
-    """
-    value = os.environ.get(env_key)
-    if value is not None:
-        return value
-
-    gcp_name = _SECRET_MAP.get(env_key)
-    if gcp_name is None:
-        return None
-
-    try:
-        client = _get_client()
-        name = f"projects/{_GCP_PROJECT}/secrets/{gcp_name}/versions/latest"
-        response = client.access_secret_version(request={"name": name})
-        return response.payload.data.decode("UTF-8")
-    except Exception:
-        _logger.warning(
-            "Failed to fetch secret %s from Secret Manager", gcp_name, exc_info=True
-        )
-        return None
+    def init_secrets(self):
+        for env_key in _SECRET_MAP.items():
+            value = self.get_secret(env_key[0])
+            if value is not None:
+                environment.variables[env_key[0]] = value
 
 
-def require_secret(env_key: str) -> str:
-    """Fetch a required secret. Raises ValueError if not found."""
-    value = get_secret(env_key)
-    if value is None:
-        raise ValueError(
-            f"{env_key} is required. Set it as an env var or in GCP Secret Manager "
-            f"(secret: {_SECRET_MAP.get(env_key, '?')})"
-        )
-    return value
+secret_manager = SecretManager()
