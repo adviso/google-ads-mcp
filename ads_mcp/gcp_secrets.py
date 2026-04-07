@@ -44,7 +44,7 @@ def get_secret(env_key: str) -> str | None:
         response = client.access_secret_version(request={"name": name})
         return response.payload.data.decode("UTF-8")
     except Exception:
-        _logger.debug("Secret %s not found in Secret Manager", gcp_name)
+        _logger.warning("Failed to fetch secret %s from Secret Manager", gcp_name, exc_info=True)
         return None
 
 
