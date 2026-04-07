@@ -3,13 +3,12 @@
 import logging
 import os
 
-import google_auth_oauthlib.flow
-from mcp.server.fastmcp import Context
-
 import ads_mcp.storage as storage
 import ads_mcp.utils as utils
+import google_auth_oauthlib.flow
 from ads_mcp.coordinator import mcp
 from ads_mcp.environment import environment
+from mcp.server.fastmcp import Context
 
 logger = logging.getLogger(__name__)
 
@@ -18,12 +17,11 @@ SCOPES = ["https://www.googleapis.com/auth/adwords"]
 
 def _get_client_config() -> dict:
     """Build the OAuth client config from env or GCP Secret Manager."""
-    from ads_mcp.gcp_secrets import require_secret
 
     return {
         "web": {
-            "client_id": require_secret("GOOGLE_CLIENT_ID"),
-            "client_secret": require_secret("GOOGLE_CLIENT_SECRET"),
+            "client_id": environment.get("GOOGLE_CLIENT_ID"),
+            "client_secret": environment.get("GOOGLE_CLIENT_SECRET"),
             "auth_uri": "https://accounts.google.com/o/oauth2/auth",
             "token_uri": "https://oauth2.googleapis.com/token",
         }
