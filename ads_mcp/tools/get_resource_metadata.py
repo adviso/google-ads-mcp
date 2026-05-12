@@ -22,7 +22,11 @@ import ads_mcp.utils as utils
 
 
 @mcp.tool(annotations=ToolAnnotations(readOnlyHint=True))
-def get_resource_metadata(resource_name: str, ctx: Context) -> Dict[str, Any]:
+def get_resource_metadata(
+    resource_name: str,
+    ctx: Context,
+    login_customer_id: str | None = None,
+) -> Dict[str, Any]:
     """Retrieves the selectable, filterable, and sortable fields for a specific Google Ads resource.
 
     Use this tool to find out which fields you can select, filter by, or sort by
@@ -33,10 +37,16 @@ def get_resource_metadata(resource_name: str, ctx: Context) -> Dict[str, Any]:
 
     Args:
         resource_name: The name of the Google Ads resource (e.g., 'campaign', 'ad_group').
+        login_customer_id: Manager (MCC) customer ID to act on behalf of, digits only.
+            Required when the target customer is reached through a manager account.
     """
     user_id = utils.get_user_id(ctx)
-    ga_service = utils.get_googleads_service("GoogleAdsFieldService", user_id)
-    request = utils.get_googleads_type("SearchGoogleAdsFieldsRequest", user_id)
+    ga_service = utils.get_googleads_service(
+        "GoogleAdsFieldService", user_id, login_customer_id
+    )
+    request = utils.get_googleads_type(
+        "SearchGoogleAdsFieldsRequest", user_id, login_customer_id
+    )
 
     # The Google Ads Field Service supports LIKE operator natively.
     # This filter ensures we only get rows that belong to the queried resource.
