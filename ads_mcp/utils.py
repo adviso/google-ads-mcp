@@ -64,7 +64,9 @@ def _get_developer_token() -> str:
     return value
 
 
-def _get_googleads_client(user_id: str) -> GoogleAdsClient:
+def _get_googleads_client(
+    user_id: str, login_customer_id: str | None = None
+) -> GoogleAdsClient:
     tokens = storage.load_tokens(user_id)
     if tokens is None:
         raise RuntimeError(
@@ -77,21 +79,27 @@ def _get_googleads_client(user_id: str) -> GoogleAdsClient:
         "developer_token": _get_developer_token(),
         "use_proto_plus": True,
     }
+    if login_customer_id:
+        config["login_customer_id"] = login_customer_id
     return GoogleAdsClient.load_from_dict(config)
 
 
-def get_googleads_service(serviceName: str, user_id: str) -> GoogleAdsServiceClient:
-    return _get_googleads_client(user_id).get_service(
+def get_googleads_service(
+    serviceName: str, user_id: str, login_customer_id: str | None = None
+) -> GoogleAdsServiceClient:
+    return _get_googleads_client(user_id, login_customer_id).get_service(
         serviceName, interceptors=[MCPHeaderInterceptor()]
     )
 
 
-def get_googleads_type(typeName: str, user_id: str):
-    return _get_googleads_client(user_id).get_type(typeName)
+def get_googleads_type(
+    typeName: str, user_id: str, login_customer_id: str | None = None
+):
+    return _get_googleads_client(user_id, login_customer_id).get_type(typeName)
 
 
-def get_googleads_client(user_id: str):
-    return _get_googleads_client(user_id)
+def get_googleads_client(user_id: str, login_customer_id: str | None = None):
+    return _get_googleads_client(user_id, login_customer_id)
 
 
 def format_output_value(value: Any) -> Any:
