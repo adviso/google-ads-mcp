@@ -13,7 +13,6 @@ _SECRET_MAP = {
     "GOOGLE_ADS_DEVELOPER_TOKEN": "google-ads-developer-token",
     "GOOGLE_CLIENT_ID": "google-ads-client-id",
     "GOOGLE_CLIENT_SECRET": "google-ads-client-secret",
-    "GOOGLE_ADS_LOGIN_CUSTOMER_ID": "google-ads-login-customer-id",
 }
 
 _GCP_PROJECT = environment.get("GCP_PROJECT")

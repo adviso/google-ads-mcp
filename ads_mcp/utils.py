@@ -64,14 +64,6 @@ def _get_developer_token() -> str:
     return value
 
 
-def _get_login_customer_id() -> str | None:
-    """Returns login customer id from env or GCP Secret Manager."""
-    value = environment.get("GOOGLE_ADS_LOGIN_CUSTOMER_ID")
-    if value is None:
-        raise ValueError("GOOGLE_ADS_LOGIN_CUSTOMER_ID is not set")
-    return value
-
-
 def _get_googleads_client(user_id: str) -> GoogleAdsClient:
     tokens = storage.load_tokens(user_id)
     if tokens is None:
@@ -85,9 +77,6 @@ def _get_googleads_client(user_id: str) -> GoogleAdsClient:
         "developer_token": _get_developer_token(),
         "use_proto_plus": True,
     }
-    login_customer_id = _get_login_customer_id()
-    if login_customer_id:
-        config["login_customer_id"] = login_customer_id
     return GoogleAdsClient.load_from_dict(config)
 
 
