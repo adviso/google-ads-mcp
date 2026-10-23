@@ -1,4 +1,7 @@
-from os import getenv
+"""Environment + Secret Manager bootstrap for the Google Ads MCP."""
+
+from google_mcp_common.environment import Environment
+from google_mcp_common.gcp_secrets import SecretManager
 
 VARIABLES = [
     "ENV",
@@ -9,39 +12,28 @@ VARIABLES = [
     "WORKOS_AUTHKIT_ISSUER_URL",
 ]
 
-CONCATENATED_VARIABLES = {
+CONCATENATED = {
     "GOOGLE_ADS_MCP_SERVER_URL": [
         "GOOGLE_ADS_MCP_SERVER_HOST",
         "GOOGLE_ADS_MCP_SERVER_PATH",
     ],
 }
 
+SECRET_MAP = {
+    "ADVISO_ENCRYPTION_KEY": "adviso-encryption-key",
+    "GOOGLE_ADS_DEVELOPER_TOKEN": "google-ads-developer-token",
+    "GOOGLE_CLIENT_ID": "google-ads-client-id",
+    "GOOGLE_CLIENT_SECRET": "google-ads-client-secret",
+}
 
-class Environment:
-    def __init__(self):
-        self.variables = {variable: getenv(variable) for variable in VARIABLES}
-        self.validate()
-        for variable, concatenated_variables in CONCATENATED_VARIABLES.items():
-            self.variables[variable] = "".join(
-                [
-                    value
-                    for value in [
-                        self.variables.get(concatenated_variable)
-                        for concatenated_variable in concatenated_variables
-                    ]
-                    if value is not None
-                ]
-            )
+environment = Environment(
+    variables=VARIABLES,
+    concatenated=CONCATENATED,
+    optional_empty=("GOOGLE_ADS_MCP_SERVER_PATH",),
+)
 
-    def validate(self) -> None:
-        for variable in VARIABLES:
-            if self.get(variable) is None:
-                raise ValueError(f"Environment variable {variable} is not set")
-            if self.get(variable) == "" and variable != "GOOGLE_ADS_MCP_SERVER_PATH":
-                raise ValueError(f"Environment variable {variable} is empty")
-
-    def get(self, variable: str) -> str | None:
-        return self.variables[variable]
-
-
-environment = Environment()
+secret_manager = SecretManager(
+    environment=environment,
+    secret_map=SECRET_MAP,
+    gcp_project=environment.get("GCP_PROJECT"),
+)

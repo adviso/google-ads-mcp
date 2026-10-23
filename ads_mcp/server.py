@@ -1,17 +1,3 @@
-# Copyright 2026 Google LLC.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#      http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
 """Entry point for the MCP server."""
 
 import asyncio
@@ -19,11 +5,12 @@ from contextlib import asynccontextmanager
 
 import uvicorn
 from fastapi import FastAPI
+from google_mcp_common import storage
+from google_mcp_common.oauth_callback import make_oauth_callback_router
 
 from ads_mcp.coordinator import mcp
 from ads_mcp.environment import environment
-from ads_mcp.oauth_callback import router as oauth_router
-import ads_mcp.storage as storage
+from ads_mcp.tools.auth import get_client_config, get_redirect_uri
 
 # The following imports are necessary to register the tools with the `mcp`
 # object, even though they are not directly used in this file.
@@ -46,6 +33,12 @@ async def lifespan(app: FastAPI):
     async with mcp.session_manager.run():
         yield
 
+
+oauth_router = make_oauth_callback_router(
+    get_client_config=get_client_config,
+    get_redirect_uri=get_redirect_uri,
+    product_label="Google Ads",
+)
 
 app = FastAPI(lifespan=lifespan)
 app.include_router(oauth_router)

@@ -26,10 +26,9 @@ from google.ads.googleads.util import get_nested_attr
 from google.ads.googleads.v23.services.services.google_ads_service import (
     GoogleAdsServiceClient,
 )
-from mcp.server.auth.middleware.auth_context import get_access_token
-from mcp.server.fastmcp import Context
+from google_mcp_common import storage
+from google_mcp_common.utils import get_user_id  # noqa: F401  (re-exported for callers)
 
-import ads_mcp.storage as storage
 from ads_mcp.environment import environment
 from ads_mcp.mcp_header_interceptor import MCPHeaderInterceptor
 
@@ -38,22 +37,6 @@ _GAQL_FILENAME = "gaql_resources.txt"
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
-
-# Fallback user ID when WorkOS auth is not configured (single-user mode).
-_DEFAULT_USER_ID = "default"
-
-
-def get_user_id(ctx: Context) -> str:
-    """Extract authenticated user_id from the verified AccessToken.
-
-    Uses the cryptographically verified AccessToken from the auth middleware
-    (WorkOS JWT sub claim), not the unverified ctx.client_id from request _meta.
-    Falls back to a single-user default when auth is not active.
-    """
-    access_token = get_access_token()
-    if access_token and access_token.client_id:
-        return access_token.client_id
-    return _DEFAULT_USER_ID
 
 
 def _get_developer_token() -> str:

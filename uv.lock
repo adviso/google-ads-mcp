@@ -474,13 +474,8 @@ name = "google-ads-mcp"
 version = "0.0.1"
 source = { editable = "." }
 dependencies = [
-    { name = "cryptography" },
-    { name = "fastapi" },
     { name = "google-ads" },
-    { name = "google-auth-oauthlib" },
-    { name = "google-cloud-secret-manager" },
-    { name = "mcp", extra = ["cli"] },
-    { name = "pyjwt", extra = ["crypto"] },
+    { name = "google-mcp-common" },
 ]
 
 [package.optional-dependencies]
@@ -492,14 +487,9 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "black", marker = "extra == 'dev'" },
-    { name = "cryptography", specifier = ">=43.0.0" },
-    { name = "fastapi", specifier = ">=0.115.0" },
     { name = "google-ads", specifier = ">=30.0.0" },
-    { name = "google-auth-oauthlib", specifier = ">=1.2.0" },
-    { name = "google-cloud-secret-manager", specifier = ">=2.20.0" },
-    { name = "mcp", extras = ["cli"], specifier = ">=1.2.0" },
+    { name = "google-mcp-common", editable = "../_common" },
     { name = "nox", marker = "extra == 'dev'", specifier = ">=2025.5.1,<2026" },
-    { name = "pyjwt", extras = ["crypto"], specifier = ">=2.8.0" },
 ]
 provides-extras = ["dev"]
 
@@ -566,6 +556,29 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/6d/df/fbea0536e1baa6ea2239fdd19e9e22c9d64c8e26a0f3921596ecc0e5397d/google_cloud_secret_manager-2.27.0.tar.gz", hash = "sha256:6af864c252bd3c11db7bb02b80cb0b14a8c9a33fc7ec4d6f245f33d8ce1f7cd1", size = 279769, upload-time = "2026-03-26T22:17:15.271Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/1f/4b/6dd1e2efd9a2e73aa847fd455a1ce375d8d3cba1a2c4f7fd69f9bf0b9dce/google_cloud_secret_manager-2.27.0-py3-none-any.whl", hash = "sha256:e5540bece65a3ad720146f3b438973faf9315109b3ffa012a58711843047a3dc", size = 225577, upload-time = "2026-03-26T22:15:19.622Z" },
+]
+
+[[package]]
+name = "google-mcp-common"
+version = "0.0.1"
+source = { editable = "../_common" }
+dependencies = [
+    { name = "cryptography" },
+    { name = "fastapi" },
+    { name = "google-auth-oauthlib" },
+    { name = "google-cloud-secret-manager" },
+    { name = "mcp", extra = ["cli"] },
+    { name = "pyjwt", extra = ["crypto"] },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "cryptography", specifier = ">=43.0.0" },
+    { name = "fastapi", specifier = ">=0.115.0" },
+    { name = "google-auth-oauthlib", specifier = ">=1.2.0" },
+    { name = "google-cloud-secret-manager", specifier = ">=2.20.0" },
+    { name = "mcp", extras = ["cli"], specifier = ">=1.2.0" },
+    { name = "pyjwt", extras = ["crypto"], specifier = ">=2.8.0" },
 ]
 
 [[package]]

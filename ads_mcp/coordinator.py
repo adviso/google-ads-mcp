@@ -25,9 +25,9 @@ from mcp.server.auth.settings import AuthSettings
 from mcp.server.fastmcp import FastMCP
 from pydantic import AnyHttpUrl
 
-from ads_mcp.environment import environment
-from ads_mcp.gcp_secrets import secret_manager
-from ads_mcp.workos_auth import WorkOSTokenVerifier
+from google_mcp_common.workos_auth import WorkOSTokenVerifier
+
+from ads_mcp.environment import environment, secret_manager
 
 _logger = logging.getLogger(__name__)
 _auth_kwargs = {}

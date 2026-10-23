@@ -1,4 +1,5 @@
-# Requires an Application Default Credentials to get secrets from GCP Secret Manager
+# Build context expected at apps/mcps/google/ so the sibling _common/
+# package is visible to the relative path-dep in ads/pyproject.toml.
 
 FROM python:3.13-slim
 
@@ -6,15 +7,19 @@ COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 
 RUN useradd --create-home appuser
 
-WORKDIR /app
+WORKDIR /app/ads
 
-COPY pyproject.toml uv.lock ./
+# Copy the shared package first so the path-dep resolves during sync.
+COPY _common /app/_common
+COPY ads/pyproject.toml ads/uv.lock ./
 RUN uv sync --frozen --no-dev --no-install-project
 
-COPY . .
+COPY ads /app/ads
 RUN chown -R appuser:appuser /app
 
-RUN mkdir -p /home/appuser/.google_ads_mcp && chown appuser:appuser /home/appuser/.google_ads_mcp
+# Pre-create the shared OAuth data dir so the named volume inherits
+# appuser ownership on first mount.
+RUN mkdir -p /data/google_oauth && chown -R appuser:appuser /data
 
 USER appuser
 

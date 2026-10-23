@@ -1,12 +1,18 @@
 services:
   google-ads-mcp:
-    build: .
+    build:
+      context: ..
+      dockerfile: ads/Dockerfile
     ports:
       - "8000:8000"
     env_file:
       - .env.local
-    # volumes:
-    #   - google-ads-mcp-data:/home/appuser/.google_ads_mcp
+    environment:
+      - GOOGLE_OAUTH_DATA_DIR=/data/google_oauth
+    volumes:
+      - google-oauth-data:/data/google_oauth
+      # ADC for GCP Secret Manager in local dev
+      - ${HOME}/.config/gcloud:/home/appuser/.config/gcloud:ro
 
-# volumes:
-#   google-ads-mcp-data:
+volumes:
+  google-oauth-data:

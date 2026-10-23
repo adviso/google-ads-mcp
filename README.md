@@ -285,7 +285,9 @@ python -c "import base64, os; print(base64.b64encode(os.urandom(32)).decode())"
 ### Multi-user storage
 
 The server stores OAuth credentials in a SQLite database (`credentials.db`)
-located in `GOOGLE_ADS_MCP_DATA_DIR` (default `~/.google_ads_mcp/`). Each
+located in `GOOGLE_OAUTH_DATA_DIR` (default `~/.google_oauth_mcp/`). The
+same store is shared with sibling Google MCPs (e.g. Analytics) so each user
+holds a single refresh token whose scope is incrementally expanded. Each
 WorkOS user (identified by the JWT `sub` claim) has their own encrypted
 credential entry. Tokens are encrypted at rest using AES-256-GCM.
 

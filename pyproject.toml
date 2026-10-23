@@ -7,20 +7,10 @@ packages = ["ads_mcp"]
 
 [project]
 name = "google-ads-mcp"
+description = "MCP Server for Google Ads, depends on Google Ads API."
 version = "0.0.1"
 requires-python = ">=3.10"
 license = { text = "Apache-2.0" }
-dependencies = [
-    "fastapi>=0.115.0",
-    "google-ads>=30.0.0",
-    "google-auth-oauthlib>=1.2.0",
-    "google-cloud-secret-manager>=2.20.0",
-    "mcp[cli]>=1.2.0",
-    "PyJWT[crypto]>=2.8.0",
-    "cryptography>=43.0.0",
-]
-
-description = "MCP Server for Google Ads, depends on Google Ads API."
 readme = "README.md"
 authors = [{ name = "Dean Lukies", email = "lukiesd@users.noreply.github.com" }]
 keywords = ["Google Ads", "Google Ads API", "MCP"]
@@ -29,6 +19,13 @@ classifiers = [
     "Intended Audience :: End Users/Desktop",
     "Programming Language :: Python"
 ]
+dependencies = [
+    "google-ads>=30.0.0",
+    "google-mcp-common",
+]
+
+[tool.uv.sources]
+google-mcp-common = { path = "../_common", editable = true }
 
 [project.optional-dependencies]
 dev = [

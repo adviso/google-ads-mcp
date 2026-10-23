@@ -7,7 +7,7 @@ import tempfile
 import unittest
 from unittest import mock
 
-import ads_mcp.storage as storage
+import google_mcp_common.storage as storage
 
 
 def _make_test_key() -> str:
@@ -16,7 +16,7 @@ def _make_test_key() -> str:
 
 
 class TestStorage(unittest.TestCase):
-    """Test cases for ads_mcp.storage."""
+    """Test cases for google_mcp_common.storage."""
 
     def setUp(self):
         self.test_key = _make_test_key()

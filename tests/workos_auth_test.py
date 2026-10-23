@@ -10,7 +10,7 @@ from cryptography.hazmat.primitives import serialization
 import jwt as pyjwt
 from jwt import PyJWKClientError
 
-from ads_mcp.workos_auth import WorkOSTokenVerifier
+from google_mcp_common.workos_auth import WorkOSTokenVerifier
 
 ISSUER = "https://test.authkit.app"
 
